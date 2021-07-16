@@ -25,13 +25,17 @@ function configFromInput(config) {
     }
 }
 `
-type Selection = {
+
+type Rect = {
   top: number
   bottom: number
   left: number
   right: number
   width: number
   height: number
+}
+
+type Selection = Rect & {
   id: string
 }
 
@@ -292,51 +296,10 @@ function endPointForLine(line: Line | UnfinishedLine): Point {
   if (!line.toMarker || !line.toPoint) {
     return line.toPoint ?? line.midPoints[0] ?? line.fromPoint
   }
-  if (Math.abs(line.toPoint.x - line.fromPoint.x) < 0.01) {
-    if (line.fromPoint.y < line.toMarker.top) {
-      return { x: line.toPoint.x, y: line.toMarker.top }
-    } else if (line.fromPoint.y > line.toMarker.bottom) {
-      return { x: line.toPoint.x, y: line.toMarker.bottom }
-    } else {
-      return line.toPoint
-    }
-  }
-  const m =
-    (line.toPoint.y - line.fromPoint.y) / (line.toPoint.x - line.fromPoint.x)
-  const n = line.fromPoint.y - m * line.fromPoint.x
-
-  const xTop = (line.toMarker.top - n) / m
-  const xBottom = (line.toMarker.bottom - n) / m
-  const yLeft = m * line.toMarker.left + n
-  const yRight = m * line.toMarker.right + n
-
-  if (
-    line.fromPoint.y < line.toPoint.y &&
-    xTop > line.toMarker.left &&
-    xTop < line.toMarker.right
-  ) {
-    return { x: xTop, y: line.toMarker.top }
-  } else if (
-    line.fromPoint.y > line.toPoint.y &&
-    xBottom > line.toMarker.left &&
-    xBottom < line.toMarker.right
-  ) {
-    return { x: xBottom, y: line.toMarker.bottom }
-  } else if (
-    line.fromPoint.x < line.toPoint.x &&
-    yLeft > line.toMarker.top &&
-    yLeft < line.toMarker.bottom
-  ) {
-    return { x: line.toMarker.left, y: yLeft }
-  } else if (
-    line.fromPoint.x > line.toPoint.x &&
-    yRight > line.toMarker.top &&
-    yRight < line.toMarker.bottom
-  ) {
-    return { x: line.toMarker.right, y: yRight }
-  } else {
-    return line.toPoint
-  }
+  return (
+    lineRectIntersection(line.fromPoint, line.toPoint, line.toMarker) ??
+    line.toPoint
+  )
 }
 
 function rangeRect(range: Range): DOMRect {
@@ -524,4 +487,87 @@ function findLast<T>(array: T[], predicate: (item: T) => boolean): T | null {
   }
 
   return null
+}
+
+function lineRectIntersection(p1: Point, p2: Point, rect: Rect): Point | null {
+  const intersections = [
+    horizontalLineIntersection(p1, p2, rect.left, rect.right, rect.top),
+    horizontalLineIntersection(p1, p2, rect.left, rect.right, rect.bottom),
+    verticalLineIntersection(p1, p2, rect.left, rect.top, rect.bottom),
+    verticalLineIntersection(p1, p2, rect.right, rect.top, rect.bottom),
+  ].filter(
+    (intersection): intersection is [number, Point] => intersection !== null,
+  )
+
+  const firstIntersection = minBy(intersections, ([t]) => t)
+  if (!firstIntersection) {
+    return null
+  }
+
+  return firstIntersection[1]
+}
+
+function horizontalLineIntersection(
+  p1: Point,
+  p2: Point,
+  x1: number,
+  x2: number,
+  y: number,
+): [number, Point] | null {
+  if (p1.y === p2.y) {
+    return null
+  }
+
+  const t = (y - p1.y) / (p2.y - p1.y)
+  const x = p1.x + t * (p2.x - p1.x)
+
+  if (isMonotonous(0, t, 1) && isMonotonous(x1, x, x2)) {
+    return [t, { x, y }]
+  } else {
+    return null
+  }
+}
+
+function verticalLineIntersection(
+  p1: Point,
+  p2: Point,
+  x: number,
+  y1: number,
+  y2: number,
+): [number, Point] | null {
+  if (p1.x === p2.x) {
+    return null
+  }
+
+  const t = (x - p1.x) / (p2.x - p1.x)
+  const y = p1.y + t * (p2.y - p1.y)
+
+  if (isMonotonous(0, t, 1) && isMonotonous(y1, y, y2)) {
+    return [t, { x, y }]
+  } else {
+    return null
+  }
+}
+
+function isMonotonous(a: number, b: number, c: number): boolean {
+  return (a <= b && b <= c) || (a >= b && b >= c)
+}
+
+function minBy<T>(array: T[], value: (item: T) => number): T | null {
+  if (array.length === 0) {
+    return null
+  }
+
+  let minItem = array[0]
+  let minValue = value(array[0])
+
+  array.slice(1).forEach((item) => {
+    const currentValue = value(item)
+    if (currentValue < minValue) {
+      minValue = currentValue
+      minItem = item
+    }
+  })
+
+  return minItem
 }
