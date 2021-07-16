@@ -38,7 +38,7 @@ export default function useLines(
 ): ReturnType {
   const [dragging, setDragging] = React.useState<UnfinishedLine | null>(null)
   const [lines, setLines] = React.useState<Line[]>([])
-  const [showStraightLines, setShowStraightLines] = React.useState(true)
+  const [showStraightLines, setShowStraightLines] = React.useState(false)
 
   const onMouseDown = useCallback(
     (event: MouseEvent, target: Marker | Line) => {
