@@ -1,3 +1,5 @@
+import { MouseEvent } from 'react'
+
 export function minBy<T>(array: T[], value: (item: T) => number): T | null {
   if (array.length === 0) {
     return null
@@ -33,4 +35,12 @@ export function findLast<T>(
   }
 
   return null
+}
+
+export function pointFromEvent(event: MouseEvent, container: HTMLElement) {
+  const containerRect = container.getBoundingClientRect()
+  return {
+    x: event.clientX - containerRect.left,
+    y: event.clientY - containerRect.top,
+  }
 }

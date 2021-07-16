@@ -2,6 +2,7 @@ import React, { MouseEvent, useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
 import { distanceBetweenPoints } from '../geometry'
 import { Line, Marker, UnfinishedLine } from '../types'
+import { pointFromEvent } from '../util'
 
 type ReturnType = {
   onMouseDown: (event: MouseEvent, marker: Marker) => void
@@ -9,6 +10,7 @@ type ReturnType = {
   onMouseUp: (event: MouseEvent, marker?: Marker) => void
   lines: Line[]
   removeLinesWithMarkerId: (id: string) => void
+  removeLineWithId: (id: string) => void
   currentlyDragging: UnfinishedLine | null
   showStraightLines: boolean
   setShowStraightLines: (showStraightLines: boolean) => void
@@ -103,22 +105,22 @@ export default function useLines(
     [lines, setLines],
   )
 
+  const removeLineWithId = useCallback(
+    (id: string) => {
+      setLines(lines.filter((line) => line.id !== id))
+    },
+    [lines, setLines],
+  )
+
   return {
     onMouseDown,
     onMouseMove,
     onMouseUp,
     lines,
     removeLinesWithMarkerId,
+    removeLineWithId,
     currentlyDragging: dragging,
     showStraightLines,
     setShowStraightLines,
-  }
-}
-
-function pointFromEvent(event: MouseEvent, container: HTMLElement) {
-  const containerRect = container.getBoundingClientRect()
-  return {
-    x: event.clientX - containerRect.left,
-    y: event.clientY - containerRect.top,
   }
 }

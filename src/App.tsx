@@ -1,11 +1,12 @@
-import React from 'react'
+import React, { MouseEvent } from 'react'
 import Arrow from './components/Arrow'
 import Code from './components/Code'
 import MarkerRect from './components/MarkerRect'
 import { Popover } from './components/Popover'
-import { Marker, Selection } from './types'
 import useLines from './hooks/useLines'
 import useTextSelection from './hooks/useTextSelection'
+import { Line, Marker, Point, Selection } from './types'
+import { pointFromEvent } from './util'
 
 const code = `function configFromInput(config) {
     var input = config._i;
@@ -39,9 +40,15 @@ export default function App() {
   const [selectedMarker, setSelectedMarker] = React.useState<Marker | null>(
     null,
   )
+  const [selectedLine, setSelectedLine] = React.useState<{
+    line: Line
+    point: Point
+  } | null>(null)
+
   const {
     lines,
     removeLinesWithMarkerId,
+    removeLineWithId,
     currentlyDragging,
     showStraightLines,
     setShowStraightLines,
@@ -63,6 +70,16 @@ export default function App() {
     setMarkers((markers) => markers.filter((m) => m.id !== marker.id))
     removeLinesWithMarkerId(marker.id)
     setSelectedMarker(null)
+  }
+
+  const selectLine = (event: MouseEvent, line: Line) => {
+    const point = pointFromEvent(event, containerRef.current!)
+    setSelectedLine({ line, point })
+  }
+
+  const removeLine = (line: Line) => {
+    removeLineWithId(line.id)
+    setSelectedLine(null)
   }
 
   return (
@@ -89,7 +106,13 @@ export default function App() {
             <Arrow line={currentlyDragging} straight={showStraightLines} />
           )}
           {lines.map((line) => (
-            <Arrow line={line} straight={showStraightLines} key={line.id} />
+            <Arrow
+              line={line}
+              straight={showStraightLines}
+              onClick={(e) => selectLine(e, line)}
+              highlighted={selectedLine?.line.id === line.id}
+              key={line.id}
+            />
           ))}
           {markers.map((marker) => (
             <MarkerRect
@@ -111,6 +134,16 @@ export default function App() {
             onBlur={() => setSelectedMarker(null)}
           >
             <button onClick={() => removeMarker(selectedMarker)}>remove</button>
+          </Popover>
+        )}
+        {selectedLine && (
+          <Popover
+            origin={selectedLine.point}
+            onBlur={() => setSelectedLine(null)}
+          >
+            <button onClick={() => removeLine(selectedLine.line)}>
+              remove
+            </button>
           </Popover>
         )}
         {textSelection && (

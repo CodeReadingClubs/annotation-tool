@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { MouseEvent } from 'react'
 import { distanceBetweenPoints, lineRectIntersection } from '../geometry'
 import { Line, Point, UnfinishedLine } from '../types'
 import { findLast } from '../util'
@@ -6,23 +6,45 @@ import { findLast } from '../util'
 type Props = {
   line: Line | UnfinishedLine
   straight: boolean
+  highlighted?: boolean
+  onClick?: (event: MouseEvent) => void
 }
 
-export default function Arrow({ line, straight }: Props) {
+export default function Arrow({
+  line,
+  straight,
+  highlighted = false,
+  onClick,
+}: Props) {
   const points = pointArrayForLine(line, straight)
   const endPoint = points[points.length - 1]
   const arrowAngle = arrowAngleForPoints(points)
   const pointsString = points.map(({ x, y }) => `${x},${y}`).join(' ')
   const color = line.fromMarker.color
 
+  const hasMouseEvents = onClick !== undefined
+  const strokeWidth = highlighted ? 5 : 3
   return (
-    <g>
+    <g
+      onClick={onClick}
+      style={{ pointerEvents: hasMouseEvents ? 'auto' : 'none' }}
+    >
+      {hasMouseEvents && (
+        <polyline
+          points={pointsString}
+          stroke='white'
+          fill='none'
+          style={{ mixBlendMode: 'darken' }}
+          strokeWidth={strokeWidth * 3}
+        />
+      )}
       <polyline
         points={pointsString}
         stroke={color}
         fill='none'
-        strokeWidth='3'
+        strokeWidth={strokeWidth}
       />
+
       {arrowAngle && (
         <line
           x1={endPoint.x}
@@ -30,7 +52,7 @@ export default function Arrow({ line, straight }: Props) {
           x2={endPoint.x + 15 * Math.cos(arrowAngle + Math.PI + Math.PI / 8)}
           y2={endPoint.y + 15 * Math.sin(arrowAngle + Math.PI + Math.PI / 8)}
           stroke={color}
-          strokeWidth='3'
+          strokeWidth={strokeWidth}
         />
       )}
       {arrowAngle && (
@@ -40,7 +62,7 @@ export default function Arrow({ line, straight }: Props) {
           x2={endPoint.x + 15 * Math.cos(arrowAngle + Math.PI - Math.PI / 8)}
           y2={endPoint.y + 15 * Math.sin(arrowAngle + Math.PI - Math.PI / 8)}
           stroke={color}
-          strokeWidth='3'
+          strokeWidth={strokeWidth}
         />
       )}
     </g>
