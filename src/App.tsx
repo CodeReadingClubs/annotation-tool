@@ -49,7 +49,7 @@ type UnfinishedLine = {
   fromPoint: Point
   fromMarker: Marker
   midPoints: Point[]
-  toPoint: Point | null
+  toPoint: Point
   toMarker: Marker | null
 }
 
@@ -225,16 +225,8 @@ type LineProps = {
 }
 
 function Line({ line, straight }: LineProps) {
-  if (!line.toPoint) {
-    return null
-  }
-
-  const startPoint = line.fromPoint
-  const endPoint = endPointForLine(line)
-
-  const points = straight
-    ? [startPoint, endPoint]
-    : [startPoint, ...line.midPoints, endPoint]
+  const points = pointArrayForLine(line, straight)
+  const endPoint = points[points.length - 1]
   const arrowAngle = arrowAngleForPoints(points)
   const pointsString = points.map(({ x, y }) => `${x},${y}`).join(' ')
   const color = line.fromMarker.color
@@ -287,19 +279,42 @@ function arrowAngleForPoints(points: Point[]): number | null {
   }
 
   return Math.atan2(
-    lastPoint.y - secondToLastPoint.y,
-    lastPoint.x - secondToLastPoint.x,
+    lastPoint.y - secondToLastPoint[0].y,
+    lastPoint.x - secondToLastPoint[0].x,
   )
 }
 
-function endPointForLine(line: Line | UnfinishedLine): Point {
-  if (!line.toMarker || !line.toPoint) {
-    return line.toPoint ?? line.midPoints[0] ?? line.fromPoint
+function pointArrayForLine(
+  line: Line | UnfinishedLine,
+  straight: boolean,
+): Point[] {
+  const allPoints = straight
+    ? [line.fromPoint, line.toPoint]
+    : [line.fromPoint, ...line.midPoints, line.toPoint]
+
+  const marker = line.toMarker
+  if (!marker) {
+    return allPoints
   }
-  return (
-    lineRectIntersection(line.fromPoint, line.toPoint, line.toMarker) ??
-    line.toPoint
-  )
+
+  const lastIndex = findLast(
+    allPoints,
+    (_, index) =>
+      index > 0 &&
+      lineRectIntersection(allPoints[index - 1], allPoints[index], marker) !==
+        null,
+  )?.[1]
+
+  if (lastIndex === undefined) {
+    throw new Error(`Can't find the intersection of a line with a marker`)
+  }
+
+  const intersection = lineRectIntersection(
+    allPoints[lastIndex],
+    allPoints[lastIndex - 1],
+    marker,
+  )!
+  return [...allPoints.slice(0, lastIndex), intersection]
 }
 
 function rangeRect(range: Range): DOMRect {
@@ -375,11 +390,12 @@ function useLines(
   const onMouseDown = useCallback(
     (event: MouseEvent, marker: Marker) => {
       event.preventDefault()
+      const currentPoint = pointFromEvent(event, containerRef.current!)
       setDragging({
         fromMarker: marker,
-        fromPoint: pointFromEvent(event, containerRef.current!),
+        fromPoint: currentPoint,
         midPoints: [],
-        toPoint: null,
+        toPoint: currentPoint,
         toMarker: null,
       })
     },
@@ -394,10 +410,9 @@ function useLines(
 
       if (marker) {
         event.stopPropagation()
-        if (marker.id === dragging.fromMarker.id) {
-          return
-        }
       }
+
+      const markerIsOriginMarker = marker?.id === dragging.fromMarker.id
 
       const currentPoint = pointFromEvent(event, containerRef.current!)
       const lastPoint =
@@ -412,7 +427,7 @@ function useLines(
         ...dragging,
         midPoints: newMidPoints,
         toPoint: currentPoint,
-        toMarker: marker ?? null,
+        toMarker: markerIsOriginMarker ? null : marker ?? null,
       })
     },
     [containerRef, dragging, showStraightLines],
@@ -478,11 +493,14 @@ function distanceBetweenPoints(a: Point, b: Point): number {
   return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y))
 }
 
-function findLast<T>(array: T[], predicate: (item: T) => boolean): T | null {
+function findLast<T>(
+  array: T[],
+  predicate: (item: T, index: number) => boolean,
+): [T, number] | null {
   for (let index = array.length - 1; index >= 0; index--) {
     const item = array[index]
-    if (predicate(item)) {
-      return item
+    if (predicate(item, index)) {
+      return [item, index]
     }
   }
 
