@@ -412,13 +412,9 @@ function useLines(
   const onMouseDown = useCallback(
     (event: MouseEvent, marker: Marker) => {
       event.preventDefault()
-      const svgRect = containerRef.current!.getBoundingClientRect()
       setDragging({
         fromMarker: marker,
-        fromPoint: {
-          x: event.clientX - svgRect.left,
-          y: event.clientY - svgRect.top,
-        },
+        fromPoint: pointFromEvent(event, containerRef.current!),
         midPoints: [],
         toPoint: null,
         toMarker: null,
@@ -440,11 +436,7 @@ function useLines(
         }
       }
 
-      const svgRect = containerRef.current!.getBoundingClientRect()
-      const currentPoint = {
-        x: event.clientX - svgRect.left,
-        y: event.clientY - svgRect.top,
-      }
+      const currentPoint = pointFromEvent(event, containerRef.current!)
       const lastPoint =
         dragging.midPoints[dragging.midPoints.length - 1] ?? dragging.fromPoint
 
@@ -474,16 +466,12 @@ function useLines(
         return
       }
 
-      const svgRect = containerRef.current!.getBoundingClientRect()
       const line = {
         fromMarker: dragging.fromMarker,
         fromPoint: dragging.fromPoint,
         midPoints: dragging.midPoints,
         toMarker: marker,
-        toPoint: {
-          x: event.clientX - svgRect.left,
-          y: event.clientY - svgRect.top,
-        },
+        toPoint: pointFromEvent(event, containerRef.current!),
         id: uuid(),
       }
       setLines((lines) => [...lines, line])
@@ -512,6 +500,14 @@ function useLines(
     currentlyDragging: dragging,
     showStraightLines,
     setShowStraightLines,
+  }
+}
+
+function pointFromEvent(event: MouseEvent, container: HTMLElement) {
+  const containerRect = container.getBoundingClientRect()
+  return {
+    x: event.clientX - containerRect.left,
+    y: event.clientY - containerRect.top,
   }
 }
 
