@@ -1,4 +1,4 @@
-import React, { MouseEvent, PropsWithChildren } from 'react'
+import React, { MouseEvent, PropsWithChildren, useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
 
 const code = `
@@ -60,7 +60,7 @@ type Line = {
 
 function App() {
   const containerRef = React.useRef<HTMLDivElement | null>(null)
-  const [selection, setSelection] = React.useState<Selection | null>(null)
+  const [selection, clearSelection] = useSelection(containerRef)
   const [markers, setMarkers] = React.useState<Marker[]>([])
   const [selectedMarker, setSelectedMarker] = React.useState<Marker | null>(
     null,
@@ -68,34 +68,6 @@ function App() {
   const [dragging, setDragging] = React.useState<UnfinishedLine | null>(null)
   const [lines, setLines] = React.useState<Line[]>([])
   const [straightArrows, setStraightArrows] = React.useState(true)
-
-  React.useEffect(() => {
-    document.onselectionchange = () => {
-      if (!containerRef.current) {
-        throw new Error(`Invalid <pre> ref`)
-      }
-      const selection = document.getSelection()
-      if (
-        !selection ||
-        selection.type !== 'Range' ||
-        selection.toString().includes('\n')
-      ) {
-        setSelection(null)
-      } else {
-        const rect = rangeRect(selection.getRangeAt(0))
-        const parentRect = containerRef.current.getBoundingClientRect()
-        setSelection({
-          top: rect.top - parentRect.top,
-          left: rect.left - parentRect.left,
-          width: rect.width,
-          height: rect.height,
-          bottom: rect.bottom - parentRect.top,
-          right: rect.right - parentRect.left,
-          id: uuid(),
-        })
-      }
-    }
-  }, [])
 
   const addMarker = (selection: Selection, color: string) => {
     console.log({ selection })
@@ -106,8 +78,7 @@ function App() {
         color,
       },
     ])
-    setSelection(null)
-    document.getSelection()?.removeAllRanges()
+    clearSelection()
   }
 
   const removeMarker = (marker: Marker) => {
@@ -463,4 +434,45 @@ function rangeRect(range: Range): DOMRect {
   }
 
   return rects[0]
+}
+
+function useSelection(
+  containerRef: React.MutableRefObject<HTMLDivElement | null>,
+): [Selection | null, () => void] {
+  const [selection, setSelection] = React.useState<Selection | null>(null)
+
+  React.useEffect(() => {
+    document.onselectionchange = () => {
+      if (!containerRef.current) {
+        throw new Error(`Invalid <pre> ref`)
+      }
+      const selection = document.getSelection()
+      if (
+        !selection ||
+        selection.type !== 'Range' ||
+        selection.toString().includes('\n')
+      ) {
+        setSelection(null)
+      } else {
+        const rect = rangeRect(selection.getRangeAt(0))
+        const parentRect = containerRef.current.getBoundingClientRect()
+        setSelection({
+          top: rect.top - parentRect.top,
+          left: rect.left - parentRect.left,
+          width: rect.width,
+          height: rect.height,
+          bottom: rect.bottom - parentRect.top,
+          right: rect.right - parentRect.left,
+          id: uuid(),
+        })
+      }
+    }
+  }, [])
+
+  const clearSelection = useCallback(() => {
+    document.getSelection()?.removeAllRanges()
+    setSelection(null)
+  }, [])
+
+  return [selection, clearSelection]
 }
