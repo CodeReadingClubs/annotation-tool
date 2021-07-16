@@ -111,7 +111,11 @@ export default function App() {
               straight={showStraightLines}
               onClick={(e) => selectLine(e, line)}
               onMouseDown={(e) => mouseEvents.line.onMouseDown(e, line)}
-              highlighted={selectedLine?.line.id === line.id}
+              highlighted={
+                selectedLine !== null &&
+                (line.id === selectedLine.line.id ||
+                  line.lineDependencies.has(selectedLine.line.id))
+              }
               key={line.id}
             />
           ))}

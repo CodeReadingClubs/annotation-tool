@@ -23,6 +23,7 @@ export type UnfinishedLine = {
   midPoints: Point[]
   toPoint: Point
   toMarker: Marker | null
+  lineDependencies: Set<string>
 }
 
 export type Line = {
@@ -32,4 +33,5 @@ export type Line = {
   toPoint: Point
   toMarker: Marker
   id: string
+  lineDependencies: Set<string>
 }

@@ -45,12 +45,17 @@ export default function useLines(
       event.preventDefault()
       const currentPoint = pointFromEvent(event, containerRef.current!)
       const marker = 'fromMarker' in target ? target.fromMarker : target
+      const lineDependencies =
+        'lineDependencies' in target
+          ? new Set([...target.lineDependencies, target.id])
+          : new Set<string>()
       setDragging({
         fromMarker: marker,
         fromPoint: currentPoint,
         midPoints: [],
         toPoint: currentPoint,
         toMarker: null,
+        lineDependencies,
       })
     },
     [containerRef],
@@ -105,6 +110,7 @@ export default function useLines(
         toMarker: marker,
         toPoint: pointFromEvent(event, containerRef.current!),
         id: uuid(),
+        lineDependencies: dragging.lineDependencies,
       }
       setLines((lines) => [...lines, line])
       setDragging(null)
@@ -125,7 +131,11 @@ export default function useLines(
 
   const removeLineWithId = useCallback(
     (id: string) => {
-      setLines(lines.filter((line) => line.id !== id))
+      setLines(
+        lines.filter(
+          (line) => line.id !== id && !line.lineDependencies.has(id),
+        ),
+      )
     },
     [lines, setLines],
   )
