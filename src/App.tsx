@@ -62,12 +62,17 @@ function App() {
   const containerRef = React.useRef<HTMLDivElement | null>(null)
   const [selection, clearSelection] = useSelection(containerRef)
   const [markers, setMarkers] = React.useState<Marker[]>([])
+  const {
+    lines,
+    removeLinesWithMarkerId,
+    currentlyDragging,
+    showStraightLines,
+    setShowStraightLines,
+    ...mouseEvents
+  } = useLines(containerRef)
   const [selectedMarker, setSelectedMarker] = React.useState<Marker | null>(
     null,
   )
-  const [dragging, setDragging] = React.useState<UnfinishedLine | null>(null)
-  const [lines, setLines] = React.useState<Line[]>([])
-  const [straightArrows, setStraightArrows] = React.useState(true)
 
   const addMarker = (selection: Selection, color: string) => {
     console.log({ selection })
@@ -83,12 +88,7 @@ function App() {
 
   const removeMarker = (marker: Marker) => {
     setMarkers((markers) => markers.filter((m) => m.id !== marker.id))
-    setLines((lines) =>
-      lines.filter(
-        (line) =>
-          line.fromMarker.id !== marker.id && line.toMarker.id !== marker.id,
-      ),
-    )
+    removeLinesWithMarkerId(marker.id)
     setSelectedMarker(null)
   }
 
@@ -98,8 +98,8 @@ function App() {
         <input
           type='checkbox'
           id='straight-arrows'
-          checked={straightArrows}
-          onChange={(e) => setStraightArrows(e.target.checked)}
+          checked={showStraightLines}
+          onChange={(e) => setShowStraightLines(e.target.checked)}
         />
         <label htmlFor='straight-arrows'>Use straight arrows</label>
       </div>
@@ -107,97 +107,25 @@ function App() {
         <pre>{code}</pre>
         <svg
           style={{
-            pointerEvents: dragging ? 'auto' : 'none',
+            pointerEvents: currentlyDragging ? 'auto' : 'none',
           }}
-          onMouseMove={(e) => {
-            if (!dragging) {
-              return
-            }
-            const svgRect = containerRef.current!.getBoundingClientRect()
-            const currentPoint = {
-              x: e.clientX - svgRect.left,
-              y: e.clientY - svgRect.top,
-            }
-            setDragging({
-              ...dragging,
-              midPoints: [...dragging.midPoints, currentPoint],
-              toPoint: currentPoint,
-              toMarker: null,
-            })
-          }}
-          onMouseUp={(e) => {
-            setDragging(null)
-          }}
+          onMouseMove={(e) => mouseEvents.onMouseMove(e)}
+          onMouseUp={(e) => mouseEvents.onMouseUp(e)}
         >
-          {dragging && <Line line={dragging} straight={straightArrows} />}
+          {currentlyDragging && (
+            <Line line={currentlyDragging} straight={showStraightLines} />
+          )}
           {lines.map((line) => (
-            <Line line={line} straight={straightArrows} key={line.id} />
+            <Line line={line} straight={showStraightLines} key={line.id} />
           ))}
           {markers.map((marker, index) => (
             <Marker
               marker={marker}
               key={marker.id}
               onClick={() => setSelectedMarker(marker)}
-              onMouseDown={(e) => {
-                e.preventDefault()
-                const svgRect = containerRef.current!.getBoundingClientRect()
-                setDragging({
-                  fromMarker: marker,
-                  fromPoint: {
-                    x: e.clientX - svgRect.left,
-                    y: e.clientY - svgRect.top,
-                  },
-                  midPoints: [],
-                  toPoint: null,
-                  toMarker: null,
-                })
-                console.log('start')
-              }}
-              onMouseMove={(e) => {
-                if (!dragging) {
-                  return
-                }
-
-                e.stopPropagation()
-                if (marker.id === dragging.fromMarker.id) {
-                  return
-                }
-                const svgRect = containerRef.current!.getBoundingClientRect()
-                const currentPoint = {
-                  x: e.clientX - svgRect.left,
-                  y: e.clientY - svgRect.top,
-                }
-                setDragging({
-                  ...dragging,
-                  midPoints: [...dragging.midPoints, currentPoint],
-                  toPoint: currentPoint,
-                  toMarker: marker,
-                })
-              }}
-              onMouseUp={(e) => {
-                if (!dragging) {
-                  return
-                }
-
-                if (marker.id === dragging.fromMarker.id) {
-                  setDragging(null)
-                } else {
-                  const svgRect = containerRef.current!.getBoundingClientRect()
-                  const line = {
-                    fromMarker: dragging.fromMarker,
-                    fromPoint: dragging.fromPoint,
-                    midPoints: dragging.midPoints,
-                    toMarker: marker,
-                    toPoint: {
-                      x: e.clientX - svgRect.left,
-                      y: e.clientY - svgRect.top,
-                    },
-                    id: uuid(),
-                  }
-                  setLines((lines) => [...lines, line])
-                  setDragging(null)
-                }
-              }}
+              onMouseDown={(e) => mouseEvents.onMouseDown(e, marker)}
+              onMouseMove={(e) => mouseEvents.onMouseMove(e, marker)}
+              onMouseUp={(e) => mouseEvents.onMouseUp(e, marker)}
             />
           ))}
         </svg>
@@ -475,4 +403,132 @@ function useSelection(
   }, [])
 
   return [selection, clearSelection]
+}
+
+type UseLinesReturnType = {
+  onMouseDown: (event: MouseEvent, marker: Marker) => void
+  onMouseMove: (event: MouseEvent, marker?: Marker) => void
+  onMouseUp: (event: MouseEvent, marker?: Marker) => void
+  lines: Line[]
+  removeLinesWithMarkerId: (id: string) => void
+  currentlyDragging: UnfinishedLine | null
+  showStraightLines: boolean
+  setShowStraightLines: (showStraightLines: boolean) => void
+}
+
+function useLines(
+  containerRef: React.MutableRefObject<HTMLDivElement | null>,
+): UseLinesReturnType {
+  const [dragging, setDragging] = React.useState<UnfinishedLine | null>(null)
+  const [lines, setLines] = React.useState<Line[]>([])
+  const [showStraightLines, setShowStraightLines] = React.useState(true)
+
+  const onMouseDown = useCallback(
+    (event: MouseEvent, marker: Marker) => {
+      event.preventDefault()
+      const svgRect = containerRef.current!.getBoundingClientRect()
+      setDragging({
+        fromMarker: marker,
+        fromPoint: {
+          x: event.clientX - svgRect.left,
+          y: event.clientY - svgRect.top,
+        },
+        midPoints: [],
+        toPoint: null,
+        toMarker: null,
+      })
+    },
+    [containerRef],
+  )
+
+  const onMouseMove = useCallback(
+    (event: MouseEvent, marker: Marker | null = null) => {
+      if (!dragging) {
+        return
+      }
+
+      if (marker) {
+        event.stopPropagation()
+        if (marker.id === dragging.fromMarker.id) {
+          return
+        }
+      }
+
+      const svgRect = containerRef.current!.getBoundingClientRect()
+      const currentPoint = {
+        x: event.clientX - svgRect.left,
+        y: event.clientY - svgRect.top,
+      }
+      const lastPoint =
+        dragging.midPoints[dragging.midPoints.length - 1] ?? dragging.fromPoint
+
+      const distance = Math.min(
+        Math.abs(currentPoint.x - lastPoint.x),
+        Math.abs(currentPoint.y - lastPoint.y),
+      )
+      const newMidPoints =
+        distance > 5
+          ? [...dragging.midPoints, currentPoint]
+          : dragging.midPoints
+
+      setDragging({
+        ...dragging,
+        midPoints: newMidPoints,
+        toPoint: currentPoint,
+        toMarker: marker ?? null,
+      })
+    },
+    [containerRef, dragging],
+  )
+
+  const onMouseUp = useCallback(
+    (event: MouseEvent, marker: Marker | null = null) => {
+      if (!dragging) {
+        return
+      }
+
+      if (!marker || marker.id === dragging.fromMarker.id) {
+        setDragging(null)
+        return
+      }
+
+      const svgRect = containerRef.current!.getBoundingClientRect()
+      const line = {
+        fromMarker: dragging.fromMarker,
+        fromPoint: dragging.fromPoint,
+        midPoints: dragging.midPoints,
+        toMarker: marker,
+        toPoint: {
+          x: event.clientX - svgRect.left,
+          y: event.clientY - svgRect.top,
+        },
+        id: uuid(),
+      }
+      setLines((lines) => [...lines, line])
+      setDragging(null)
+    },
+    [containerRef, dragging, setDragging],
+  )
+
+  const removeLinesWithMarkerId = useCallback(
+    (id: string) => {
+      setLines(
+        lines.filter(
+          (line) => line.fromMarker.id !== id && line.toMarker.id !== id,
+        ),
+      )
+    },
+    [lines, setLines],
+  )
+
+  return {
+    onMouseDown,
+    onMouseMove,
+    onMouseUp,
+    lines,
+    removeLinesWithMarkerId,
+    currentlyDragging: dragging,
+    showStraightLines,
+    setShowStraightLines,
+  }
 }
