@@ -30,6 +30,8 @@ function configFromInput(config) {
 }
 `
 
+const colors = ['lightblue', 'lightgreen', 'gold', 'pink']
+
 export type Marker = Selection & {
   color: string
 }
@@ -122,13 +124,14 @@ export default function App() {
               y: selection.bottom,
             }}
           >
-            <button onClick={() => addMarker(selection, 'lightblue')}>
-              blue
-            </button>
-            <button onClick={() => addMarker(selection, 'lightgreen')}>
-              green
-            </button>
-            <button onClick={() => addMarker(selection, 'gold')}>yellow</button>
+            {colors.map((color) => (
+              <button
+                key={color}
+                className='color-button'
+                style={{ '--color': color } as React.CSSProperties}
+                onClick={() => addMarker(selection, color)}
+              />
+            ))}
           </Popover>
         )}
       </div>

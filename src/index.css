@@ -38,7 +38,9 @@ body {
   transform: var(--transform);
   margin-top: 10px;
   background: gray;
-  border-radius: 5px;
+  border-radius: 3px;
+  line-height: 1;
+  padding: 3px;
 }
 
 .popover::after {
@@ -50,4 +52,14 @@ body {
   height: 8px;
   background: gray;
   clip-path: polygon(0% 100%,100% 100%, 50% 0%);
+}
+
+.color-button {
+  --color: red;
+  width: 20px;
+  height: 20px;
+  margin: 3px;
+  padding: 0;
+  border: 0;
+  background: var(--color);
 }
