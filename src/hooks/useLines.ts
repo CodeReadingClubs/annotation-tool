@@ -1,24 +1,7 @@
 import React, { MouseEvent, useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
-import { Marker } from './App'
-import { distanceBetweenPoints, Point } from './geometry'
-
-export type UnfinishedLine = {
-  fromPoint: Point
-  fromMarker: Marker
-  midPoints: Point[]
-  toPoint: Point
-  toMarker: Marker | null
-}
-
-export type Line = {
-  fromPoint: Point
-  fromMarker: Marker
-  midPoints: Point[]
-  toPoint: Point
-  toMarker: Marker
-  id: string
-}
+import { distanceBetweenPoints } from '../geometry'
+import { Line, Marker, UnfinishedLine } from '../types'
 
 type ReturnType = {
   onMouseDown: (event: MouseEvent, marker: Marker) => void

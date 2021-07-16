@@ -1,5 +1,5 @@
 import React, { MouseEvent } from 'react'
-import { Marker } from './App'
+import { Marker } from '../types'
 
 type Props = {
   marker: Marker

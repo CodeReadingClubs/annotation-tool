@@ -1,15 +1,5 @@
+import { Point, Rect } from './types'
 import { isMonotonous, minBy } from './util'
-
-export type Point = { x: number; y: number }
-
-export type Rect = {
-  top: number
-  bottom: number
-  left: number
-  right: number
-  width: number
-  height: number
-}
 
 export function distanceBetweenPoints(a: Point, b: Point): number {
   return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y))

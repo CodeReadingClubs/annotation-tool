@@ -1,12 +1,8 @@
 import React, { useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
-import { Rect } from './geometry'
+import { Selection } from '../types'
 
-export type Selection = Rect & {
-  id: string
-}
-
-export default function useSelection(
+export default function useTextSelection(
   containerRef: React.MutableRefObject<HTMLDivElement | null>,
 ): [Selection | null, () => void] {
   const [selection, setSelection] = React.useState<Selection | null>(null)

@@ -1,5 +1,5 @@
 import React, { PropsWithChildren } from 'react'
-import { Point } from './geometry'
+import { Point } from '../types'
 
 type Props = PropsWithChildren<{
   origin: Point

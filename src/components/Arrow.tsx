@@ -1,7 +1,7 @@
 import React from 'react'
-import { distanceBetweenPoints, lineRectIntersection, Point } from './geometry'
-import { Line, UnfinishedLine } from './useLines'
-import { findLast } from './util'
+import { distanceBetweenPoints, lineRectIntersection } from '../geometry'
+import { Line, Point, UnfinishedLine } from '../types'
+import { findLast } from '../util'
 
 type Props = {
   line: Line | UnfinishedLine

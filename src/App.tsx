@@ -1,10 +1,11 @@
 import React from 'react'
-import Arrow from './Arrow'
-import Code from './Code'
-import MarkerRect from './MarkerRect'
-import { Popover } from './Popover'
-import useLines from './useLines'
-import useSelection, { Selection } from './useSelection'
+import Arrow from './components/Arrow'
+import Code from './components/Code'
+import MarkerRect from './components/MarkerRect'
+import { Popover } from './components/Popover'
+import { Marker, Selection } from './types'
+import useLines from './hooks/useLines'
+import useTextSelection from './hooks/useTextSelection'
 
 const code = `function configFromInput(config) {
     var input = config._i;
@@ -29,16 +30,11 @@ const code = `function configFromInput(config) {
     }
 }
 `
-
 const colors = ['lightblue', 'lightgreen', 'gold', 'pink']
-
-export type Marker = Selection & {
-  color: string
-}
 
 export default function App() {
   const containerRef = React.useRef<HTMLDivElement | null>(null)
-  const [selection, clearSelection] = useSelection(containerRef)
+  const [textSelection, clearTextSelection] = useTextSelection(containerRef)
   const [markers, setMarkers] = React.useState<Marker[]>([])
   const [selectedMarker, setSelectedMarker] = React.useState<Marker | null>(
     null,
@@ -60,7 +56,7 @@ export default function App() {
         color,
       },
     ])
-    clearSelection()
+    clearTextSelection()
   }
 
   const removeMarker = (marker: Marker) => {
@@ -117,11 +113,11 @@ export default function App() {
             <button onClick={() => removeMarker(selectedMarker)}>remove</button>
           </Popover>
         )}
-        {selection && (
+        {textSelection && (
           <Popover
             origin={{
-              x: selection.left + selection.width / 2,
-              y: selection.bottom,
+              x: textSelection.left + textSelection.width / 2,
+              y: textSelection.bottom,
             }}
           >
             {colors.map((color) => (
@@ -129,7 +125,7 @@ export default function App() {
                 key={color}
                 className='color-button'
                 style={{ '--color': color } as React.CSSProperties}
-                onClick={() => addMarker(selection, color)}
+                onClick={() => addMarker(textSelection, color)}
               />
             ))}
           </Popover>
