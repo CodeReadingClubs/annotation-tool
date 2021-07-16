@@ -75,7 +75,6 @@ function App() {
   )
 
   const addMarker = (selection: Selection, color: string) => {
-    console.log({ selection })
     setMarkers((markers) => [
       ...markers,
       {
@@ -222,53 +221,19 @@ type LineProps = {
 }
 
 function Line({ line, straight }: LineProps) {
-  if (!line || !line.toPoint) {
+  if (!line.toPoint) {
     return null
   }
 
-  if (!line.toMarker) {
-    return (
-      <Arrow
-        from={line.fromPoint}
-        to={line.toPoint}
-        midPoints={straight ? [] : line.midPoints}
-        color={line.fromMarker.color}
-      />
-    )
-  }
-
+  const startPoint = line.fromPoint
   const endPoint = endPointForLine(line)
 
-  return (
-    <Arrow
-      from={line.fromPoint}
-      to={endPoint}
-      midPoints={straight ? [] : line.midPoints}
-      color={line.fromMarker.color}
-    />
-  )
-}
-
-type ArrowProps = {
-  from: Point
-  to: Point
-  midPoints: Point[]
-  color: string
-}
-
-function Arrow({ from, to, midPoints, color }: ArrowProps) {
-  const dx = to.x - from.x
-  const dy = to.y - from.y
-  const isLong = Math.max(Math.abs(dx), Math.abs(dy)) > 40
-
-  const points = [from, ...midPoints, to]
-  const count = points.length
-  const angle = Math.atan2(
-    points[count - 1].y - points[count - 2].y,
-    points[count - 1].x - points[count - 2].x,
-  )
-  console.log(points)
+  const points = straight
+    ? [startPoint, endPoint]
+    : [startPoint, ...line.midPoints, endPoint]
+  const arrowAngle = arrowAngleForPoints(points)
   const pointsString = points.map(({ x, y }) => `${x},${y}`).join(' ')
+  const color = line.fromMarker.color
 
   return (
     <g>
@@ -278,22 +243,22 @@ function Arrow({ from, to, midPoints, color }: ArrowProps) {
         fill='none'
         strokeWidth='3'
       />
-      {isLong && (
+      {arrowAngle && (
         <line
-          x1={to.x}
-          y1={to.y}
-          x2={to.x + 15 * Math.cos(angle + Math.PI + Math.PI / 8)}
-          y2={to.y + 15 * Math.sin(angle + Math.PI + Math.PI / 8)}
+          x1={endPoint.x}
+          y1={endPoint.y}
+          x2={endPoint.x + 15 * Math.cos(arrowAngle + Math.PI + Math.PI / 8)}
+          y2={endPoint.y + 15 * Math.sin(arrowAngle + Math.PI + Math.PI / 8)}
           stroke={color}
           strokeWidth='3'
         />
       )}
-      {isLong && (
+      {arrowAngle && (
         <line
-          x1={to.x}
-          y1={to.y}
-          x2={to.x + 15 * Math.cos(angle + Math.PI - Math.PI / 8)}
-          y2={to.y + 15 * Math.sin(angle + Math.PI - Math.PI / 8)}
+          x1={endPoint.x}
+          y1={endPoint.y}
+          x2={endPoint.x + 15 * Math.cos(arrowAngle + Math.PI - Math.PI / 8)}
+          y2={endPoint.y + 15 * Math.sin(arrowAngle + Math.PI - Math.PI / 8)}
           stroke={color}
           strokeWidth='3'
         />
@@ -302,7 +267,28 @@ function Arrow({ from, to, midPoints, color }: ArrowProps) {
   )
 }
 
-function endPointForLine(line: Line | UnfinishedLine) {
+function arrowAngleForPoints(points: Point[]): number | null {
+  const n = points.length
+  if (distanceBetweenPoints(points[0], points[n - 1]) < 40) {
+    return null
+  }
+
+  const lastPoint = points[n - 1]
+  const secondToLastPoint = findLast(
+    points,
+    (pt) => distanceBetweenPoints(pt, lastPoint) > 4,
+  )
+  if (!secondToLastPoint) {
+    return null
+  }
+
+  return Math.atan2(
+    lastPoint.y - secondToLastPoint.y,
+    lastPoint.x - secondToLastPoint.x,
+  )
+}
+
+function endPointForLine(line: Line | UnfinishedLine): Point {
   if (!line.toMarker || !line.toPoint) {
     return line.toPoint ?? line.midPoints[0] ?? line.fromPoint
   }
@@ -462,12 +448,8 @@ function useLines(
       const lastPoint =
         dragging.midPoints[dragging.midPoints.length - 1] ?? dragging.fromPoint
 
-      const distance = Math.min(
-        Math.abs(currentPoint.x - lastPoint.x),
-        Math.abs(currentPoint.y - lastPoint.y),
-      )
       const newMidPoints =
-        distance > 5
+        !showStraightLines && distanceBetweenPoints(currentPoint, lastPoint) > 3
           ? [...dragging.midPoints, currentPoint]
           : dragging.midPoints
 
@@ -478,7 +460,7 @@ function useLines(
         toMarker: marker ?? null,
       })
     },
-    [containerRef, dragging],
+    [containerRef, dragging, showStraightLines],
   )
 
   const onMouseUp = useCallback(
@@ -531,4 +513,19 @@ function useLines(
     showStraightLines,
     setShowStraightLines,
   }
+}
+
+function distanceBetweenPoints(a: Point, b: Point): number {
+  return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y))
+}
+
+function findLast<T>(array: T[], predicate: (item: T) => boolean): T | null {
+  for (let index = array.length - 1; index >= 0; index--) {
+    const item = array[index]
+    if (predicate(item)) {
+      return item
+    }
+  }
+
+  return null
 }
