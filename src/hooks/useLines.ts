@@ -4,16 +4,33 @@ import { distanceBetweenPoints } from '../geometry'
 import { Line, Marker, UnfinishedLine } from '../types'
 import { pointFromEvent } from '../util'
 
-type ReturnType = {
+type SvgMouseEvents = {
+  onMouseMove: (event: MouseEvent) => void
+  onMouseUp: (event: MouseEvent) => void
+}
+
+type MarkerMouseEvents = {
   onMouseDown: (event: MouseEvent, marker: Marker) => void
-  onMouseMove: (event: MouseEvent, marker?: Marker) => void
-  onMouseUp: (event: MouseEvent, marker?: Marker) => void
+  onMouseMove: (event: MouseEvent, marker: Marker) => void
+  onMouseUp: (event: MouseEvent, marker: Marker) => void
+}
+
+type LineMouseEvents = {
+  onMouseDown: (event: MouseEvent, line: Line) => void
+}
+
+type ReturnType = {
   lines: Line[]
   removeLinesWithMarkerId: (id: string) => void
   removeLineWithId: (id: string) => void
   currentlyDragging: UnfinishedLine | null
   showStraightLines: boolean
   setShowStraightLines: (showStraightLines: boolean) => void
+  mouseEvents: {
+    svg: SvgMouseEvents
+    marker: MarkerMouseEvents
+    line: LineMouseEvents
+  }
 }
 
 export default function useLines(
@@ -24,9 +41,10 @@ export default function useLines(
   const [showStraightLines, setShowStraightLines] = React.useState(true)
 
   const onMouseDown = useCallback(
-    (event: MouseEvent, marker: Marker) => {
+    (event: MouseEvent, target: Marker | Line) => {
       event.preventDefault()
       const currentPoint = pointFromEvent(event, containerRef.current!)
+      const marker = 'fromMarker' in target ? target.fromMarker : target
       setDragging({
         fromMarker: marker,
         fromPoint: currentPoint,
@@ -113,14 +131,25 @@ export default function useLines(
   )
 
   return {
-    onMouseDown,
-    onMouseMove,
-    onMouseUp,
     lines,
     removeLinesWithMarkerId,
     removeLineWithId,
     currentlyDragging: dragging,
     showStraightLines,
     setShowStraightLines,
+    mouseEvents: {
+      svg: {
+        onMouseMove: (e) => onMouseMove(e),
+        onMouseUp: (e) => onMouseUp(e),
+      },
+      marker: {
+        onMouseDown: (e, marker) => onMouseDown(e, marker),
+        onMouseMove: (e, marker) => onMouseMove(e, marker),
+        onMouseUp: (e, marker) => onMouseUp(e, marker),
+      },
+      line: {
+        onMouseDown: (e, line) => onMouseDown(e, line),
+      },
+    },
   }
 }

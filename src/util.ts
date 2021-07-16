@@ -1,22 +1,27 @@
 import { MouseEvent } from 'react'
 
-export function minBy<T>(array: T[], value: (item: T) => number): T | null {
+export function minBy<T>(
+  array: T[],
+  value: (item: T) => number,
+): [T, number] | null {
   if (array.length === 0) {
     return null
   }
 
-  let minItem = array[0]
-  let minValue = value(array[0])
+  let minIndex = 0
+  let minItem = array[minIndex]
+  let minValue = value(minItem)
 
-  array.slice(1).forEach((item) => {
+  array.slice(1).forEach((item, index) => {
     const currentValue = value(item)
     if (currentValue < minValue) {
       minValue = currentValue
       minItem = item
+      minIndex = index
     }
   })
 
-  return minItem
+  return [minItem, minIndex]
 }
 
 export function isMonotonous(a: number, b: number, c: number): boolean {

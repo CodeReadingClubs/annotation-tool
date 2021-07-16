@@ -52,7 +52,7 @@ export default function App() {
     currentlyDragging,
     showStraightLines,
     setShowStraightLines,
-    ...mouseEvents
+    mouseEvents,
   } = useLines(containerRef)
 
   const addMarker = (selection: Selection, color: string) => {
@@ -99,8 +99,8 @@ export default function App() {
           style={{
             pointerEvents: currentlyDragging ? 'auto' : 'none',
           }}
-          onMouseMove={(e) => mouseEvents.onMouseMove(e)}
-          onMouseUp={(e) => mouseEvents.onMouseUp(e)}
+          onMouseMove={(e) => mouseEvents.svg.onMouseMove(e)}
+          onMouseUp={(e) => mouseEvents.svg.onMouseUp(e)}
         >
           {currentlyDragging && (
             <Arrow line={currentlyDragging} straight={showStraightLines} />
@@ -110,6 +110,7 @@ export default function App() {
               line={line}
               straight={showStraightLines}
               onClick={(e) => selectLine(e, line)}
+              onMouseDown={(e) => mouseEvents.line.onMouseDown(e, line)}
               highlighted={selectedLine?.line.id === line.id}
               key={line.id}
             />
@@ -119,9 +120,9 @@ export default function App() {
               marker={marker}
               key={marker.id}
               onClick={() => setSelectedMarker(marker)}
-              onMouseDown={(e) => mouseEvents.onMouseDown(e, marker)}
-              onMouseMove={(e) => mouseEvents.onMouseMove(e, marker)}
-              onMouseUp={(e) => mouseEvents.onMouseUp(e, marker)}
+              onMouseDown={(e) => mouseEvents.marker.onMouseDown(e, marker)}
+              onMouseMove={(e) => mouseEvents.marker.onMouseMove(e, marker)}
+              onMouseUp={(e) => mouseEvents.marker.onMouseUp(e, marker)}
             />
           ))}
         </svg>

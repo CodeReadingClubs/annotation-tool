@@ -1,13 +1,13 @@
 import React, { MouseEvent } from 'react'
-import { distanceBetweenPoints, lineRectIntersection } from '../geometry'
-import { Line, Point, UnfinishedLine } from '../types'
-import { findLast } from '../util'
+import { arrowAngleForPoints, pointArrayForLine } from '../geometry'
+import { Line, UnfinishedLine } from '../types'
 
 type Props = {
   line: Line | UnfinishedLine
   straight: boolean
   highlighted?: boolean
   onClick?: (event: MouseEvent) => void
+  onMouseDown?: (event: MouseEvent) => void
 }
 
 export default function Arrow({
@@ -15,6 +15,7 @@ export default function Arrow({
   straight,
   highlighted = false,
   onClick,
+  onMouseDown,
 }: Props) {
   const points = pointArrayForLine(line, straight)
   const endPoint = points[points.length - 1]
@@ -22,12 +23,16 @@ export default function Arrow({
   const pointsString = points.map(({ x, y }) => `${x},${y}`).join(' ')
   const color = line.fromMarker.color
 
-  const hasMouseEvents = onClick !== undefined
+  const hasMouseEvents = onClick !== undefined || onMouseDown !== undefined
   const strokeWidth = highlighted ? 5 : 3
   return (
     <g
       onClick={onClick}
-      style={{ pointerEvents: hasMouseEvents ? 'auto' : 'none' }}
+      onMouseDown={onMouseDown}
+      style={{
+        pointerEvents: hasMouseEvents ? 'auto' : 'none',
+        cursor: hasMouseEvents ? 'crosshair' : 'auto',
+      }}
     >
       {hasMouseEvents && (
         <polyline
@@ -67,56 +72,4 @@ export default function Arrow({
       )}
     </g>
   )
-}
-function arrowAngleForPoints(points: Point[]): number | null {
-  const n = points.length
-  if (distanceBetweenPoints(points[0], points[n - 1]) < 40) {
-    return null
-  }
-
-  const lastPoint = points[n - 1]
-  const secondToLastPoint = findLast(
-    points,
-    (pt) => distanceBetweenPoints(pt, lastPoint) > 4,
-  )
-  if (!secondToLastPoint) {
-    return null
-  }
-
-  return Math.atan2(
-    lastPoint.y - secondToLastPoint[0].y,
-    lastPoint.x - secondToLastPoint[0].x,
-  )
-}
-function pointArrayForLine(
-  line: Line | UnfinishedLine,
-  straight: boolean,
-): Point[] {
-  const allPoints = straight
-    ? [line.fromPoint, line.toPoint]
-    : [line.fromPoint, ...line.midPoints, line.toPoint]
-
-  const marker = line.toMarker
-  if (!marker) {
-    return allPoints
-  }
-
-  const lastIndex = findLast(
-    allPoints,
-    (_, index) =>
-      index > 0 &&
-      lineRectIntersection(allPoints[index - 1], allPoints[index], marker) !==
-        null,
-  )?.[1]
-
-  if (lastIndex === undefined) {
-    throw new Error(`Can't find the intersection of a line with a marker`)
-  }
-
-  const intersection = lineRectIntersection(
-    allPoints[lastIndex],
-    allPoints[lastIndex - 1],
-    marker,
-  )!
-  return [...allPoints.slice(0, lastIndex), intersection]
 }
