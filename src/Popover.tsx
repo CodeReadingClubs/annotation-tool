@@ -1,13 +1,12 @@
 import React, { PropsWithChildren } from 'react'
-import { Marker } from './App'
-import { Selection } from './useSelection'
+import { Point } from './geometry'
 
 type Props = PropsWithChildren<{
-  rect: Selection | Marker
+  origin: Point
   onBlur?: () => void
 }>
 
-export function Popover({ rect, children, onBlur }: Props) {
+export function Popover({ origin, onBlur, children }: Props) {
   const ref = React.useRef<HTMLDivElement | null>(null)
   React.useEffect(() => {
     if (onBlur) {
@@ -21,13 +20,13 @@ export function Popover({ rect, children, onBlur }: Props) {
       onBlur={onBlur}
       tabIndex={1}
       className='popover'
-      style={{
-        position: 'absolute',
-        top: rect.top + rect.height,
-        left: rect.left + rect.width / 2,
-        transform: 'translateX(-50%)',
-        outline: 'none',
-      }}
+      style={
+        {
+          '--top': `${origin.y}px`,
+          '--left': `${origin.x}px`,
+          '--transform': 'translateX(-50%)',
+        } as React.CSSProperties
+      }
     >
       {children}
     </div>

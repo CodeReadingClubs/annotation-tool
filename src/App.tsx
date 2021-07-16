@@ -105,12 +105,23 @@ export default function App() {
           ))}
         </svg>
         {selectedMarker && (
-          <Popover rect={selectedMarker} onBlur={() => setSelectedMarker(null)}>
+          <Popover
+            origin={{
+              x: selectedMarker.left + selectedMarker.width / 2,
+              y: selectedMarker.bottom,
+            }}
+            onBlur={() => setSelectedMarker(null)}
+          >
             <button onClick={() => removeMarker(selectedMarker)}>remove</button>
           </Popover>
         )}
         {selection && (
-          <Popover rect={selection}>
+          <Popover
+            origin={{
+              x: selection.left + selection.width / 2,
+              y: selection.bottom,
+            }}
+          >
             <button onClick={() => addMarker(selection, 'lightblue')}>
               blue
             </button>

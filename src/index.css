@@ -26,3 +26,28 @@ body {
 
 
 
+.popover {
+  --top: auto;
+  --left: auto;
+  --transform: none;
+
+  position: absolute;
+  outline: none;
+  top: var(--top);
+  left: var(--left);
+  transform: var(--transform);
+  margin-top: 10px;
+  background: gray;
+  border-radius: 5px;
+}
+
+.popover::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: calc(50% - 5px);
+  width: 10px;
+  height: 8px;
+  background: gray;
+  clip-path: polygon(0% 100%,100% 100%, 50% 0%);
+}
