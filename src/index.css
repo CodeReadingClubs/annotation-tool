@@ -6,9 +6,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: sans-serif;
-  line-height: 1.5;
-
-
 }
 
 .container {
@@ -39,7 +36,6 @@ body {
   margin-top: 10px;
   background: gray;
   border-radius: 3px;
-  line-height: 1;
   padding: 3px;
 }
 
@@ -62,4 +58,23 @@ body {
   padding: 0;
   border: 0;
   background: var(--color);
+}
+
+
+.code-container {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  font-family: 'Roboto Mono', monospace;
+  column-gap: 18px;
+  row-gap: 6px;
+}
+
+.line-number {
+  color: gray;
+  text-align: right;
+}
+
+pre {
+  margin: 0;
 }

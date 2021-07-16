@@ -1,12 +1,12 @@
 import React from 'react'
 import Arrow from './Arrow'
+import Code from './Code'
 import MarkerRect from './MarkerRect'
 import { Popover } from './Popover'
 import useLines from './useLines'
 import useSelection, { Selection } from './useSelection'
 
-const code = `
-function configFromInput(config) {
+const code = `function configFromInput(config) {
     var input = config._i;
     if (isUndefined(input)) {
         config._d = new Date(hooks.now());
@@ -81,7 +81,7 @@ export default function App() {
         <label htmlFor='straight-arrows'>Use straight arrows</label>
       </div>
       <div className='container' ref={containerRef}>
-        <pre>{code}</pre>
+        <Code code={code} />
         <svg
           style={{
             pointerEvents: currentlyDragging ? 'auto' : 'none',

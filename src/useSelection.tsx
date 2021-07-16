@@ -20,6 +20,7 @@ export default function useSelection(
       if (
         !selection ||
         selection.type !== 'Range' ||
+        selection.anchorNode?.parentElement?.className !== 'code-line' ||
         selection.toString().includes('\n')
       ) {
         setSelection(null)
