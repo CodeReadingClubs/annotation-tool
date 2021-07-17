@@ -43,7 +43,7 @@ function Annotations({
           key={color}
           onClick={() => toggleAnnotation(color)}
           className={`color-button ${
-            color in annotations ? 'color-button--active' : ''
+            annotations[color] ? 'color-button--active' : ''
           }`}
           style={{ '--color': color } as React.CSSProperties}
         ></button>
