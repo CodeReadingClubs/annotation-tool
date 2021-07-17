@@ -58,6 +58,7 @@ body {
   padding: 0;
   border: 0;
   background: var(--color);
+  border-radius: 3px;
 }
 
 .code-container {
