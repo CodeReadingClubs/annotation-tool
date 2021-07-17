@@ -17,12 +17,14 @@ export default function Settings() {
         onChange={(e) => dispatch(setShowStraightArrows(e.target.checked))}
       />
       <label htmlFor='straight-arrows'>Use straight arrows</label>
-      <button disabled={!canUndo} onClick={() => dispatch(undo())}>
-        undo
-      </button>
-      <button disabled={!canRedo} onClick={() => dispatch(redo())}>
-        redo
-      </button>
+      <div>
+        <button disabled={!canUndo} onClick={() => dispatch(undo())}>
+          undo
+        </button>
+        <button disabled={!canRedo} onClick={() => dispatch(redo())}>
+          redo
+        </button>
+      </div>
     </div>
   )
 }
