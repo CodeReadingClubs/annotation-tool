@@ -1,19 +1,19 @@
-import { Line, Point, Rect, UnfinishedLine } from './types'
+import { Arrow, Point, Rect, UnfinishedArrow } from './types'
 import { findLast, isMonotonous, minBy } from './util'
 
 export function distanceBetweenPoints(a: Point, b: Point): number {
   return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y))
 }
 
-export function pointArrayForLine(
-  line: Line | UnfinishedLine,
+export function pointArrayForArrow(
+  arrow: Arrow | UnfinishedArrow,
   straight: boolean,
 ): Point[] {
   const allPoints = straight
-    ? [line.fromPoint, line.toPoint]
-    : [line.fromPoint, ...line.midPoints, line.toPoint]
+    ? [arrow.fromPoint, arrow.toPoint]
+    : [arrow.fromPoint, ...arrow.midPoints, arrow.toPoint]
 
-  const marker = line.toMarker
+  const marker = arrow.toMarker
   if (!marker) {
     return allPoints
   }

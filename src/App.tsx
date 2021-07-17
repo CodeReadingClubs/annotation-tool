@@ -1,12 +1,12 @@
 import React, { MouseEvent } from 'react'
 import colors from './colors'
-import Arrow from './components/Arrow'
+import ArrowLine from './components/ArrowLine'
 import Code from './components/Code'
 import MarkerRect from './components/MarkerRect'
 import { Popover } from './components/Popover'
-import useLines from './hooks/useLines'
+import useArrows from './hooks/useArrows'
 import useTextSelection from './hooks/useTextSelection'
-import { Line, Marker, Point, Selection } from './types'
+import { Arrow, Marker, Point, Selection } from './types'
 import { pointFromEvent, toggleSetMember } from './util'
 
 const code = `function configFromInput(config) {
@@ -40,8 +40,8 @@ export default function App() {
   const [selectedMarker, setSelectedMarker] = React.useState<Marker | null>(
     null,
   )
-  const [selectedLine, setSelectedLine] = React.useState<{
-    line: Line
+  const [selectedArrow, setSelectedArrow] = React.useState<{
+    arrow: Arrow
     point: Point
   } | null>(null)
   const [lineAnnotations, setLineAnnotations] = React.useState<
@@ -49,14 +49,14 @@ export default function App() {
   >(new Map())
 
   const {
-    lines,
-    removeLinesWithMarkerId,
-    removeLineWithId,
+    arrows,
+    removeArrowsWithMarkerId,
+    removeArrowWithId,
     currentlyDragging,
-    showStraightLines,
-    setShowStraightLines,
+    showStraightArrows,
+    setShowStraightArrows,
     mouseEvents,
-  } = useLines(containerRef)
+  } = useArrows(containerRef)
 
   const addMarker = (selection: Selection, color: string) => {
     setMarkers((markers) => [
@@ -71,22 +71,21 @@ export default function App() {
 
   const removeMarker = (marker: Marker) => {
     setMarkers((markers) => markers.filter((m) => m.id !== marker.id))
-    removeLinesWithMarkerId(marker.id)
+    removeArrowsWithMarkerId(marker.id)
     setSelectedMarker(null)
   }
 
-  const selectLine = (event: MouseEvent, line: Line) => {
+  const selectArrow = (event: MouseEvent, arrow: Arrow) => {
     const point = pointFromEvent(event, containerRef.current!)
-    setSelectedLine({ line, point })
+    setSelectedArrow({ arrow, point })
   }
 
-  const removeLine = (line: Line) => {
-    removeLineWithId(line.id)
-    setSelectedLine(null)
+  const removeArrow = (arrow: Arrow) => {
+    removeArrowWithId(arrow.id)
+    setSelectedArrow(null)
   }
 
   const toggleLineAnnotation = (line: number, color: string) => {
-    const annotationsForLine = lineAnnotations.get(line)
     const newAnnotations = new Map(lineAnnotations)
     newAnnotations.set(
       line,
@@ -101,8 +100,8 @@ export default function App() {
         <input
           type='checkbox'
           id='straight-arrows'
-          checked={showStraightLines}
-          onChange={(e) => setShowStraightLines(e.target.checked)}
+          checked={showStraightArrows}
+          onChange={(e) => setShowStraightArrows(e.target.checked)}
         />
         <label htmlFor='straight-arrows'>Use straight arrows</label>
       </div>
@@ -120,20 +119,23 @@ export default function App() {
           onMouseUp={(e) => mouseEvents.svg.onMouseUp(e)}
         >
           {currentlyDragging && (
-            <Arrow line={currentlyDragging} straight={showStraightLines} />
+            <ArrowLine
+              arrow={currentlyDragging}
+              straight={showStraightArrows}
+            />
           )}
-          {lines.map((line) => (
-            <Arrow
-              line={line}
-              straight={showStraightLines}
-              onClick={(e) => selectLine(e, line)}
-              onMouseDown={(e) => mouseEvents.line.onMouseDown(e, line)}
+          {arrows.map((arrow) => (
+            <ArrowLine
+              arrow={arrow}
+              straight={showStraightArrows}
+              onClick={(e) => selectArrow(e, arrow)}
+              onMouseDown={(e) => mouseEvents.arrow.onMouseDown(e, arrow)}
               highlighted={
-                selectedLine !== null &&
-                (line.id === selectedLine.line.id ||
-                  line.lineDependencies.has(selectedLine.line.id))
+                selectedArrow !== null &&
+                (arrow.id === selectedArrow.arrow.id ||
+                  arrow.arrowDependencies.has(selectedArrow.arrow.id))
               }
-              key={line.id}
+              key={arrow.id}
             />
           ))}
           {markers.map((marker) => (
@@ -158,12 +160,12 @@ export default function App() {
             <button onClick={() => removeMarker(selectedMarker)}>remove</button>
           </Popover>
         )}
-        {selectedLine && (
+        {selectedArrow && (
           <Popover
-            origin={selectedLine.point}
-            onBlur={() => setSelectedLine(null)}
+            origin={selectedArrow.point}
+            onBlur={() => setSelectedArrow(null)}
           >
-            <button onClick={() => removeLine(selectedLine.line)}>
+            <button onClick={() => removeArrow(selectedArrow.arrow)}>
               remove
             </button>
           </Popover>

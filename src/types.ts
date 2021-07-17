@@ -17,21 +17,21 @@ export type Marker = Selection & {
   color: string
 }
 
-export type UnfinishedLine = {
+export type UnfinishedArrow = {
   fromPoint: Point
   fromMarker: Marker
   midPoints: Point[]
   toPoint: Point
   toMarker: Marker | null
-  lineDependencies: Set<string>
+  arrowDependencies: Set<string>
 }
 
-export type Line = {
+export type Arrow = {
   fromPoint: Point
   fromMarker: Marker
   midPoints: Point[]
   toPoint: Point
   toMarker: Marker
   id: string
-  lineDependencies: Set<string>
+  arrowDependencies: Set<string>
 }

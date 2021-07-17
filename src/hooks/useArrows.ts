@@ -1,7 +1,7 @@
 import React, { MouseEvent, useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
 import { distanceBetweenPoints } from '../geometry'
-import { Line, Marker, UnfinishedLine } from '../types'
+import { Arrow, Marker, UnfinishedArrow } from '../types'
 import { pointFromEvent } from '../util'
 
 type SvgMouseEvents = {
@@ -15,39 +15,39 @@ type MarkerMouseEvents = {
   onMouseUp: (event: MouseEvent, marker: Marker) => void
 }
 
-type LineMouseEvents = {
-  onMouseDown: (event: MouseEvent, line: Line) => void
+type ArrowMouseEvents = {
+  onMouseDown: (event: MouseEvent, arrow: Arrow) => void
 }
 
 type ReturnType = {
-  lines: Line[]
-  removeLinesWithMarkerId: (id: string) => void
-  removeLineWithId: (id: string) => void
-  currentlyDragging: UnfinishedLine | null
-  showStraightLines: boolean
-  setShowStraightLines: (showStraightLines: boolean) => void
+  arrows: Arrow[]
+  removeArrowsWithMarkerId: (id: string) => void
+  removeArrowWithId: (id: string) => void
+  currentlyDragging: UnfinishedArrow | null
+  showStraightArrows: boolean
+  setShowStraightArrows: (showStraightArrows: boolean) => void
   mouseEvents: {
     svg: SvgMouseEvents
     marker: MarkerMouseEvents
-    line: LineMouseEvents
+    arrow: ArrowMouseEvents
   }
 }
 
-export default function useLines(
+export default function useArrows(
   containerRef: React.MutableRefObject<HTMLDivElement | null>,
 ): ReturnType {
-  const [dragging, setDragging] = React.useState<UnfinishedLine | null>(null)
-  const [lines, setLines] = React.useState<Line[]>([])
-  const [showStraightLines, setShowStraightLines] = React.useState(false)
+  const [dragging, setDragging] = React.useState<UnfinishedArrow | null>(null)
+  const [arrows, setArrows] = React.useState<Arrow[]>([])
+  const [showStraightArrows, setShowStraightArrows] = React.useState(false)
 
   const onMouseDown = useCallback(
-    (event: MouseEvent, target: Marker | Line) => {
+    (event: MouseEvent, target: Marker | Arrow) => {
       event.preventDefault()
       const currentPoint = pointFromEvent(event, containerRef.current!)
       const marker = 'fromMarker' in target ? target.fromMarker : target
-      const lineDependencies =
-        'lineDependencies' in target
-          ? new Set([...target.lineDependencies, target.id])
+      const arrowDependencies =
+        'arrowDependencies' in target
+          ? new Set([...target.arrowDependencies, target.id])
           : new Set<string>()
       setDragging({
         fromMarker: marker,
@@ -55,7 +55,7 @@ export default function useLines(
         midPoints: [],
         toPoint: currentPoint,
         toMarker: null,
-        lineDependencies,
+        arrowDependencies,
       })
     },
     [containerRef],
@@ -78,7 +78,8 @@ export default function useLines(
         dragging.midPoints[dragging.midPoints.length - 1] ?? dragging.fromPoint
 
       const newMidPoints =
-        !showStraightLines && distanceBetweenPoints(currentPoint, lastPoint) > 3
+        !showStraightArrows &&
+        distanceBetweenPoints(currentPoint, lastPoint) > 3
           ? [...dragging.midPoints, currentPoint]
           : dragging.midPoints
 
@@ -89,7 +90,7 @@ export default function useLines(
         toMarker: markerIsOriginMarker ? null : marker ?? null,
       })
     },
-    [containerRef, dragging, showStraightLines],
+    [containerRef, dragging, showStraightArrows],
   )
 
   const onMouseUp = useCallback(
@@ -103,50 +104,50 @@ export default function useLines(
         return
       }
 
-      const line = {
+      const arrow = {
         fromMarker: dragging.fromMarker,
         fromPoint: dragging.fromPoint,
         midPoints: dragging.midPoints,
         toMarker: marker,
         toPoint: pointFromEvent(event, containerRef.current!),
         id: uuid(),
-        lineDependencies: dragging.lineDependencies,
+        arrowDependencies: dragging.arrowDependencies,
       }
-      setLines((lines) => [...lines, line])
+      setArrows((arrows) => [...arrows, arrow])
       setDragging(null)
     },
     [containerRef, dragging, setDragging],
   )
 
-  const removeLinesWithMarkerId = useCallback(
+  const removeArrowsWithMarkerId = useCallback(
     (id: string) => {
-      setLines(
-        lines.filter(
-          (line) => line.fromMarker.id !== id && line.toMarker.id !== id,
+      setArrows(
+        arrows.filter(
+          (arrow) => arrow.fromMarker.id !== id && arrow.toMarker.id !== id,
         ),
       )
     },
-    [lines, setLines],
+    [arrows, setArrows],
   )
 
-  const removeLineWithId = useCallback(
+  const removeArrowWithId = useCallback(
     (id: string) => {
-      setLines(
-        lines.filter(
-          (line) => line.id !== id && !line.lineDependencies.has(id),
+      setArrows(
+        arrows.filter(
+          (arrow) => arrow.id !== id && !arrow.arrowDependencies.has(id),
         ),
       )
     },
-    [lines, setLines],
+    [arrows, setArrows],
   )
 
   return {
-    lines,
-    removeLinesWithMarkerId,
-    removeLineWithId,
+    arrows,
+    removeArrowsWithMarkerId,
+    removeArrowWithId,
     currentlyDragging: dragging,
-    showStraightLines,
-    setShowStraightLines,
+    showStraightArrows,
+    setShowStraightArrows,
     mouseEvents: {
       svg: {
         onMouseMove: (e) => onMouseMove(e),
@@ -157,8 +158,8 @@ export default function useLines(
         onMouseMove: (e, marker) => onMouseMove(e, marker),
         onMouseUp: (e, marker) => onMouseUp(e, marker),
       },
-      line: {
-        onMouseDown: (e, line) => onMouseDown(e, line),
+      arrow: {
+        onMouseDown: (e, arrow) => onMouseDown(e, arrow),
       },
     },
   }

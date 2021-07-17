@@ -1,27 +1,27 @@
 import React, { MouseEvent } from 'react'
-import { arrowAngleForPoints, pointArrayForLine } from '../geometry'
-import { Line, UnfinishedLine } from '../types'
+import { arrowAngleForPoints, pointArrayForArrow } from '../geometry'
+import { Arrow, UnfinishedArrow } from '../types'
 
 type Props = {
-  line: Line | UnfinishedLine
+  arrow: Arrow | UnfinishedArrow
   straight: boolean
   highlighted?: boolean
   onClick?: (event: MouseEvent) => void
   onMouseDown?: (event: MouseEvent) => void
 }
 
-export default function Arrow({
-  line,
+export default function ArrowLine({
+  arrow,
   straight,
   highlighted = false,
   onClick,
   onMouseDown,
 }: Props) {
-  const points = pointArrayForLine(line, straight)
+  const points = pointArrayForArrow(arrow, straight)
   const endPoint = points[points.length - 1]
   const arrowAngle = arrowAngleForPoints(points)
   const pointsString = points.map(({ x, y }) => `${x},${y}`).join(' ')
-  const color = line.fromMarker.color
+  const color = arrow.fromMarker.color
 
   const hasMouseEvents = onClick !== undefined || onMouseDown !== undefined
   const strokeWidth = highlighted ? 5 : 3
