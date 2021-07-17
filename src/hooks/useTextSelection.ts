@@ -39,7 +39,7 @@ export default function useTextSelection(
         dispatch(selectText(rectInContainerCoordinates))
       }
     }
-  }, [])
+  }, [isTextCurrentlySelected])
 }
 
 function rangeRect(range: Range): DOMRect {
