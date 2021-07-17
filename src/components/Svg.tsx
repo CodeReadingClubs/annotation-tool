@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { shallowEqual } from 'react-redux'
 import useArrowDrawing from '../hooks/useArrowDrawing'
-import useTextSelection from '../hooks/useTextSelection'
+import useTextSelectionHandler from '../hooks/useTextSelectionHandler'
 import { selectArrow, selectMarker } from '../reducer'
 import { useDispatch, useSelector } from '../store'
 import { pointFromEvent } from '../util'
@@ -16,7 +16,11 @@ export default function Svg() {
     shallowEqual,
   )
   const { drag, mouseEvents } = useArrowDrawing(containerRef)
-  useTextSelection(containerRef)
+
+  const selectionChangeHandler = useTextSelectionHandler(containerRef)
+  useEffect(() => {
+    document.onselectionchange = selectionChangeHandler
+  }, [selectionChangeHandler])
 
   return (
     <svg

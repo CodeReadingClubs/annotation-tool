@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Code from './components/Code'
 import Controls from './components/Controls'
-import useKeyboardUndoRedo from './hooks/useKeyboardUndoRedo'
 import SelectionPopover from './components/SelectionPopover'
 import Svg from './components/Svg'
+import useKeyboardUndoHandler from './hooks/useKeyboardUndoHandler'
 
 const code = `function configFromInput(config) {
     var input = config._i;
@@ -29,7 +29,10 @@ const code = `function configFromInput(config) {
 }
 `
 export default function App() {
-  useKeyboardUndoRedo()
+  const handler = useKeyboardUndoHandler()
+  useEffect(() => {
+    document.onkeydown = handler
+  }, [handler])
 
   return (
     <div>

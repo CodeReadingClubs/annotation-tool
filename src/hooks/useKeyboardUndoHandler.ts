@@ -1,12 +1,12 @@
-import React from 'react'
+import { useCallback } from 'react'
 import { useDispatch } from '../store'
 import { redo, undo } from '../undoable'
 
-export default function useKeyboardUndoRedo() {
+export default function useKeyboardUndoHandler() {
   const dispatch = useDispatch()
 
-  React.useEffect(() => {
-    document.onkeydown = (event: KeyboardEvent) => {
+  const handler = useCallback(
+    (event: KeyboardEvent) => {
       if (
         event.key === 'z' &&
         (event.ctrlKey || event.metaKey) &&
@@ -20,6 +20,9 @@ export default function useKeyboardUndoRedo() {
         event.stopPropagation()
         dispatch(undo())
       }
-    }
-  }, [])
+    },
+    [dispatch],
+  )
+
+  return handler
 }
