@@ -1,14 +1,18 @@
 import React, { Fragment } from 'react'
-import colors from '../colors'
+import { shallowEqual } from 'react-redux'
 import { toggleLineAnnotation } from '../reducer'
 import { useDispatch, useSelector } from '../store'
 
 export default function Code() {
   const dispatch = useDispatch()
-  const { code, annotations } = useSelector((state) => ({
-    code: state.code,
-    annotations: state.lineAnnotations,
-  }))
+  const { code, annotations, colors } = useSelector(
+    (state) => ({
+      code: state.code,
+      annotations: state.lineAnnotations,
+      colors: state.colors,
+    }),
+    shallowEqual,
+  )
   const lines = code.split('\n')
 
   return (
@@ -16,6 +20,7 @@ export default function Code() {
       {lines.map((line, index) => (
         <Fragment key={index}>
           <Annotations
+            colors={colors}
             annotations={annotations[index + 1] ?? {}}
             toggleAnnotation={(color) =>
               dispatch(toggleLineAnnotation({ lineNumber: index + 1, color }))
@@ -30,9 +35,11 @@ export default function Code() {
 }
 
 function Annotations({
+  colors,
   annotations,
   toggleAnnotation,
 }: {
+  colors: string[]
   annotations: Record<string, boolean>
   toggleAnnotation: (color: string) => void
 }) {

@@ -1,6 +1,5 @@
 import { AnyAction, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { v4 as uuid } from 'uuid'
-import colors from './colors'
 import { Arrow, Marker, Point, Rect } from './types'
 
 const code = `function configFromInput(config) {
@@ -48,7 +47,7 @@ const initialState: State = {
   markers: [],
   arrows: [],
   lineAnnotations: {},
-  colors,
+  colors: ['lightblue', 'lightgreen', 'gold', 'pink'],
   showStraightArrows: false,
 }
 

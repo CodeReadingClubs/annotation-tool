@@ -3,7 +3,7 @@ import { clearSelection, selectText } from '../reducer'
 import { useDispatch, useSelector } from '../store'
 
 export default function useTextSelection(
-  containerRef: React.MutableRefObject<HTMLDivElement | null>,
+  containerRef: React.MutableRefObject<SVGSVGElement | null>,
 ) {
   const dispatch = useDispatch()
   const isTextCurrentlySelected = useSelector(

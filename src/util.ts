@@ -42,7 +42,10 @@ export function findLast<T>(
   return null
 }
 
-export function pointFromEvent(event: MouseEvent, container: HTMLElement) {
+export function pointFromEvent(
+  event: MouseEvent,
+  container: HTMLElement | SVGSVGElement,
+) {
   const containerRect = container.getBoundingClientRect()
   return {
     x: event.clientX - containerRect.left,

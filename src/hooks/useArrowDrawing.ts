@@ -31,7 +31,7 @@ type ReturnType = {
 }
 
 export default function useArrowDrawing(
-  containerRef: React.MutableRefObject<HTMLDivElement | null>,
+  containerRef: React.MutableRefObject<SVGSVGElement | null>,
 ): ReturnType {
   const [drag, setDrag] = React.useState<UnfinishedArrow | null>(null)
   const showStraightArrows = useSelector((state) => state.showStraightArrows)
