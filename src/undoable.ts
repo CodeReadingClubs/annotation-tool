@@ -1,5 +1,5 @@
 import { AnyAction, createAction, Reducer } from '@reduxjs/toolkit'
-import { useSelector } from 'react-redux'
+import { shallowEqual, useSelector } from 'react-redux'
 
 type StateWrapper<State extends StateSlice, StateSlice> = State & {
   past: StateSlice[]
@@ -9,9 +9,11 @@ type ActionWrapper<Action> =
   | Action
   | ReturnType<typeof undo>
   | ReturnType<typeof redo>
+  | ReturnType<typeof reset>
 
 export const undo = createAction('undoable/undo')
 export const redo = createAction('undoable/redo')
+export const reset = createAction('undoable/reset')
 
 export default function undoable<
   State extends StateSlice,
@@ -21,6 +23,7 @@ export default function undoable<
   reducer: Reducer<State, Action>,
   slice: (state: State) => StateSlice,
   shouldLogAction: (action: Action) => boolean,
+  clearSlice: StateSlice,
 ): Reducer<StateWrapper<State, StateSlice>, ActionWrapper<Action>> {
   return (state, action) => {
     if (!state) {
@@ -52,6 +55,19 @@ export default function undoable<
           ...newState,
           past: [slice(currentState as unknown as State), ...past],
           future: future.slice(1),
+        }
+      }
+      case reset.type: {
+        const { past, future, ...currentState } = state
+        const newState = { ...currentState, ...clearSlice } as unknown as State
+        if (shallowEqual(currentState, newState)) {
+          return state
+        } else {
+          return {
+            ...newState,
+            past: [slice(currentState as unknown as State), ...past],
+            future: [],
+          }
         }
       }
       default: {

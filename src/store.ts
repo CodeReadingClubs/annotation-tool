@@ -6,7 +6,12 @@ import {
 } from 'react-redux'
 import { persistReducer, persistStore } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
-import reducer, { isUndoableAction, State, undoableSlice } from './reducer'
+import reducer, {
+  emptyAnnotations,
+  isUndoableAction,
+  State,
+  undoableSlice,
+} from './reducer'
 import undoable from './undoable'
 
 const persistConfig = {
@@ -15,7 +20,12 @@ const persistConfig = {
   blacklist: ['past', 'future'],
 }
 
-const undoableReducer = undoable(reducer, undoableSlice, isUndoableAction)
+const undoableReducer = undoable(
+  reducer,
+  undoableSlice,
+  isUndoableAction,
+  emptyAnnotations,
+)
 const undoablePersistedReducer = persistReducer(persistConfig, undoableReducer)
 const store = configureStore({
   reducer: undoablePersistedReducer,

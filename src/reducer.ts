@@ -129,7 +129,7 @@ export const {
   setShowStraightArrows,
 } = actions
 
-const undoableActions = new Set([
+const undoableActions: Set<string> = new Set([
   addMarker.type,
   removeMarker.type,
   addArrow.type,
@@ -139,6 +139,15 @@ const undoableActions = new Set([
 
 export function isUndoableAction(action: AnyAction): boolean {
   return undoableActions.has(action.type)
+}
+
+export const emptyAnnotations: Pick<
+  State,
+  'markers' | 'arrows' | 'lineAnnotations'
+> = {
+  markers: [],
+  arrows: [],
+  lineAnnotations: {},
 }
 
 export function undoableSlice({

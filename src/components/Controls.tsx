@@ -1,7 +1,7 @@
 import React from 'react'
 import { setShowStraightArrows } from '../reducer'
 import { useDispatch, useSelector } from '../store'
-import { redo, undo, useCanUndoRedo } from '../undoable'
+import { redo, reset, undo, useCanUndoRedo } from '../undoable'
 
 export default function Controls() {
   const dispatch = useDispatch()
@@ -24,6 +24,7 @@ export default function Controls() {
         <button disabled={!canRedo} onClick={() => dispatch(redo())}>
           redo
         </button>
+        <button onClick={() => dispatch(reset())}>clear</button>
       </div>
     </div>
   )
