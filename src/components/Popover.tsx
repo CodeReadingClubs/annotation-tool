@@ -1,24 +1,27 @@
 import React, { PropsWithChildren } from 'react'
+import { clearSelection } from '../reducer'
+import { useDispatch } from '../store'
 import { Point } from '../types'
 
 type Props = PropsWithChildren<{
   origin: Point
-  onBlur?: () => void
+  autofocus?: boolean
 }>
 
-export function Popover({ origin, onBlur, children }: Props) {
+export function Popover({ origin, autofocus = false, children }: Props) {
+  const dispatch = useDispatch()
   const ref = React.useRef<HTMLDivElement | null>(null)
   React.useEffect(() => {
-    if (onBlur) {
+    if (autofocus) {
       ref.current?.focus()
     }
-  }, [])
+  }, [autofocus])
 
   return (
     <div
       ref={ref}
-      onBlur={onBlur}
-      tabIndex={1}
+      onBlur={autofocus ? () => dispatch(clearSelection()) : undefined}
+      tabIndex={autofocus ? 1 : undefined}
       className='popover'
       style={
         {

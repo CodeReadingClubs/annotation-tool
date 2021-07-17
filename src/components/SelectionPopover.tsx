@@ -47,11 +47,11 @@ export default function SelectionPopover() {
     case 'marker': {
       return (
         <Popover
+          autofocus
           origin={{
             x: currentSelection.marker.left + currentSelection.marker.width / 2,
             y: currentSelection.marker.bottom,
           }}
-          onBlur={() => dispatch(clearSelection())}
         >
           <button
             onClick={() => dispatch(removeMarker(currentSelection.marker))}
@@ -63,10 +63,7 @@ export default function SelectionPopover() {
     }
     case 'arrow': {
       return (
-        <Popover
-          origin={currentSelection.point}
-          onBlur={() => dispatch(clearSelection())}
-        >
+        <Popover autofocus origin={currentSelection.point}>
           <button onClick={() => dispatch(removeArrow(currentSelection.arrow))}>
             remove
           </button>
