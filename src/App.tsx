@@ -133,7 +133,7 @@ export default function App() {
               highlighted={
                 selectedArrow !== null &&
                 (arrow.id === selectedArrow.arrow.id ||
-                  arrow.arrowDependencies.has(selectedArrow.arrow.id))
+                  arrow.dependencies.has(selectedArrow.arrow.id))
               }
               key={arrow.id}
             />

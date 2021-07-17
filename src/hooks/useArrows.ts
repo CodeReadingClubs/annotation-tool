@@ -45,17 +45,17 @@ export default function useArrows(
       event.preventDefault()
       const currentPoint = pointFromEvent(event, containerRef.current!)
       const marker = 'fromMarker' in target ? target.fromMarker : target
-      const arrowDependencies =
-        'arrowDependencies' in target
-          ? new Set([...target.arrowDependencies, target.id])
-          : new Set<string>()
+      const dependencies =
+        'dependencies' in target
+          ? new Set([...target.dependencies, target.id, marker.id])
+          : new Set([marker.id])
       setDragging({
         fromMarker: marker,
         fromPoint: currentPoint,
         midPoints: [],
         toPoint: currentPoint,
         toMarker: null,
-        arrowDependencies,
+        dependencies,
       })
     },
     [containerRef],
@@ -111,7 +111,7 @@ export default function useArrows(
         toMarker: marker,
         toPoint: pointFromEvent(event, containerRef.current!),
         id: uuid(),
-        arrowDependencies: dragging.arrowDependencies,
+        dependencies: new Set([...dragging.dependencies, marker.id]),
       }
       setArrows((arrows) => [...arrows, arrow])
       setDragging(null)
@@ -121,11 +121,7 @@ export default function useArrows(
 
   const removeArrowsWithMarkerId = useCallback(
     (id: string) => {
-      setArrows(
-        arrows.filter(
-          (arrow) => arrow.fromMarker.id !== id && arrow.toMarker.id !== id,
-        ),
-      )
+      setArrows(arrows.filter((arrow) => !arrow.dependencies.has(id)))
     },
     [arrows, setArrows],
   )
@@ -134,7 +130,7 @@ export default function useArrows(
     (id: string) => {
       setArrows(
         arrows.filter(
-          (arrow) => arrow.id !== id && !arrow.arrowDependencies.has(id),
+          (arrow) => arrow.id !== id && !arrow.dependencies.has(id),
         ),
       )
     },
