@@ -2,9 +2,9 @@ import React from 'react'
 import { shallowEqual } from 'react-redux'
 import ArrowLine from './components/ArrowLine'
 import Code from './components/Code'
+import Controls from './components/Controls'
 import MarkerRect from './components/MarkerRect'
 import { Popover } from './components/Popover'
-import Settings from './components/Settings'
 import useArrowDrawing from './hooks/useArrowDrawing'
 import useKeyboardUndoRedo from './hooks/useKeyboardUndoRedo'
 import useTextSelection from './hooks/useTextSelection'
@@ -54,7 +54,7 @@ export default function App() {
 
   return (
     <div>
-      <Settings />
+      <Controls />
       <div className='container' ref={containerRef}>
         <Code />
         <svg

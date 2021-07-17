@@ -3,7 +3,7 @@ import { setShowStraightArrows } from '../reducer'
 import { useDispatch, useSelector } from '../store'
 import { redo, undo, useCanUndoRedo } from '../undoable'
 
-export default function Settings() {
+export default function Controls() {
   const dispatch = useDispatch()
   const showStraightArrows = useSelector((state) => state.showStraightArrows)
   const { canUndo, canRedo } = useCanUndoRedo()
