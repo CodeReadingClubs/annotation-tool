@@ -1,13 +1,22 @@
-import React, { MouseEvent } from 'react'
-import colors from './colors'
+import React from 'react'
+import { shallowEqual } from 'react-redux'
 import ArrowLine from './components/ArrowLine'
 import Code from './components/Code'
 import MarkerRect from './components/MarkerRect'
 import { Popover } from './components/Popover'
-import useArrows from './hooks/useArrows'
+import Settings from './components/Settings'
+import useArrowDrawing from './hooks/useArrowDrawing'
 import useTextSelection from './hooks/useTextSelection'
-import { Arrow, Marker, Point, Selection } from './types'
-import { pointFromEvent, toggleSetMember } from './util'
+import {
+  addMarker,
+  clearSelection,
+  removeArrow,
+  removeMarker,
+  selectArrow,
+  selectMarker,
+} from './reducer'
+import { useDispatch, useSelector } from './store'
+import { pointFromEvent } from './util'
 
 const code = `function configFromInput(config) {
     var input = config._i;
@@ -35,105 +44,42 @@ const code = `function configFromInput(config) {
 
 export default function App() {
   const containerRef = React.useRef<HTMLDivElement | null>(null)
-  const [textSelection, clearTextSelection] = useTextSelection(containerRef)
-  const [markers, setMarkers] = React.useState<Marker[]>([])
-  const [selectedMarker, setSelectedMarker] = React.useState<Marker | null>(
-    null,
-  )
-  const [selectedArrow, setSelectedArrow] = React.useState<{
-    arrow: Arrow
-    point: Point
-  } | null>(null)
-  const [lineAnnotations, setLineAnnotations] = React.useState<
-    Map<number, Set<string>>
-  >(new Map())
-
-  const {
-    arrows,
-    removeArrowsWithMarkerId,
-    removeArrowWithId,
-    currentlyDragging,
-    showStraightArrows,
-    setShowStraightArrows,
-    mouseEvents,
-  } = useArrows(containerRef)
-
-  const addMarker = (selection: Selection, color: string) => {
-    setMarkers((markers) => [
-      ...markers,
-      {
-        ...selection,
-        color,
-      },
-    ])
-    clearTextSelection()
-  }
-
-  const removeMarker = (marker: Marker) => {
-    setMarkers((markers) => markers.filter((m) => m.id !== marker.id))
-    removeArrowsWithMarkerId(marker.id)
-    setSelectedMarker(null)
-  }
-
-  const selectArrow = (event: MouseEvent, arrow: Arrow) => {
-    const point = pointFromEvent(event, containerRef.current!)
-    setSelectedArrow({ arrow, point })
-  }
-
-  const removeArrow = (arrow: Arrow) => {
-    removeArrowWithId(arrow.id)
-    setSelectedArrow(null)
-  }
-
-  const toggleLineAnnotation = (line: number, color: string) => {
-    const newAnnotations = new Map(lineAnnotations)
-    newAnnotations.set(
-      line,
-      toggleSetMember(lineAnnotations.get(line) ?? new Set(), color),
-    )
-    setLineAnnotations(newAnnotations)
-  }
+  useTextSelection(containerRef)
+  const dispatch = useDispatch()
+  const { currentSelection, markers, arrows, colors, showStraightArrows } =
+    useSelector((state) => state, shallowEqual)
+  const { drag, mouseEvents } = useArrowDrawing(containerRef)
 
   return (
     <div>
-      <div>
-        <input
-          type='checkbox'
-          id='straight-arrows'
-          checked={showStraightArrows}
-          onChange={(e) => setShowStraightArrows(e.target.checked)}
-        />
-        <label htmlFor='straight-arrows'>Use straight arrows</label>
-      </div>
+      <Settings />
       <div className='container' ref={containerRef}>
-        <Code
-          code={code}
-          annotations={lineAnnotations}
-          toggleAnnotation={toggleLineAnnotation}
-        />
+        <Code />
         <svg
           style={{
-            pointerEvents: currentlyDragging ? 'auto' : 'none',
+            pointerEvents: drag ? 'auto' : 'none',
           }}
           onMouseMove={(e) => mouseEvents.svg.onMouseMove(e)}
           onMouseUp={(e) => mouseEvents.svg.onMouseUp(e)}
         >
-          {currentlyDragging && (
-            <ArrowLine
-              arrow={currentlyDragging}
-              straight={showStraightArrows}
-            />
-          )}
+          {drag && <ArrowLine arrow={drag} straight={showStraightArrows} />}
           {arrows.map((arrow) => (
             <ArrowLine
               arrow={arrow}
               straight={showStraightArrows}
-              onClick={(e) => selectArrow(e, arrow)}
+              onClick={(e) =>
+                dispatch(
+                  selectArrow({
+                    arrow,
+                    point: pointFromEvent(e, containerRef.current!),
+                  }),
+                )
+              }
               onMouseDown={(e) => mouseEvents.arrow.onMouseDown(e, arrow)}
               highlighted={
-                selectedArrow !== null &&
-                (arrow.id === selectedArrow.arrow.id ||
-                  arrow.dependencies.has(selectedArrow.arrow.id))
+                currentSelection?.type === 'arrow' &&
+                (arrow.id === currentSelection.arrow.id ||
+                  currentSelection.arrow.id in arrow.dependencies)
               }
               key={arrow.id}
             />
@@ -142,14 +88,15 @@ export default function App() {
             <MarkerRect
               marker={marker}
               key={marker.id}
-              onClick={() => setSelectedMarker(marker)}
+              onClick={() => dispatch(selectMarker(marker))}
               onMouseDown={(e) => mouseEvents.marker.onMouseDown(e, marker)}
               onMouseMove={(e) => mouseEvents.marker.onMouseMove(e, marker)}
               onMouseUp={(e) => mouseEvents.marker.onMouseUp(e, marker)}
             />
           ))}
         </svg>
-        {selectedMarker && (
+        <SelectionPopover />
+        {/* {selectedMarker && (
           <Popover
             origin={{
               x: selectedMarker.left + selectedMarker.width / 2,
@@ -186,8 +133,74 @@ export default function App() {
               />
             ))}
           </Popover>
-        )}
+        )} */}
       </div>
     </div>
   )
+}
+
+function SelectionPopover() {
+  const currentSelection = useSelector(
+    (state) => state.currentSelection,
+    shallowEqual,
+  )
+  const colors = useSelector((state) => state.colors, shallowEqual)
+  const dispatch = useDispatch()
+
+  if (!currentSelection) {
+    return null
+  }
+
+  switch (currentSelection.type) {
+    case 'text': {
+      return (
+        <Popover
+          origin={{
+            x: currentSelection.rect.left + currentSelection.rect.width / 2,
+            y: currentSelection.rect.bottom,
+          }}
+        >
+          {colors.map((color) => (
+            <button
+              key={color}
+              className='color-button'
+              style={{ '--color': color } as React.CSSProperties}
+              onClick={() =>
+                dispatch(addMarker({ rect: currentSelection.rect, color }))
+              }
+            />
+          ))}
+        </Popover>
+      )
+    }
+    case 'marker': {
+      return (
+        <Popover
+          origin={{
+            x: currentSelection.marker.left + currentSelection.marker.width / 2,
+            y: currentSelection.marker.bottom,
+          }}
+          onBlur={() => dispatch(clearSelection())}
+        >
+          <button
+            onClick={() => dispatch(removeMarker(currentSelection.marker))}
+          >
+            remove
+          </button>
+        </Popover>
+      )
+    }
+    case 'arrow': {
+      return (
+        <Popover
+          origin={currentSelection.point}
+          onBlur={() => dispatch(clearSelection())}
+        >
+          <button onClick={() => dispatch(removeArrow(currentSelection.arrow))}>
+            remove
+          </button>
+        </Popover>
+      )
+    }
+  }
 }

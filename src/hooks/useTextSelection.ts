@@ -1,16 +1,19 @@
-import React, { useCallback } from 'react'
-import { v4 as uuid } from 'uuid'
-import { Selection } from '../types'
+import React from 'react'
+import { clearSelection, selectText } from '../reducer'
+import { useDispatch, useSelector } from '../store'
 
 export default function useTextSelection(
   containerRef: React.MutableRefObject<HTMLDivElement | null>,
-): [Selection | null, () => void] {
-  const [selection, setSelection] = React.useState<Selection | null>(null)
+) {
+  const dispatch = useDispatch()
+  const isTextCurrentlySelected = useSelector(
+    (state) => state.currentSelection?.type === 'text',
+  )
 
   React.useEffect(() => {
     document.onselectionchange = () => {
       if (!containerRef.current) {
-        throw new Error(`Invalid <pre> ref`)
+        throw new Error(`Invalid container ref`)
       }
       const selection = document.getSelection()
       if (
@@ -19,29 +22,24 @@ export default function useTextSelection(
         selection.anchorNode?.parentElement?.className !== 'code-line' ||
         selection.toString().includes('\n')
       ) {
-        setSelection(null)
+        if (isTextCurrentlySelected) {
+          dispatch(clearSelection())
+        }
       } else {
         const rect = rangeRect(selection.getRangeAt(0))
         const parentRect = containerRef.current.getBoundingClientRect()
-        setSelection({
+        const rectInContainerCoordinates = {
           top: rect.top - parentRect.top,
           left: rect.left - parentRect.left,
           width: rect.width,
           height: rect.height,
           bottom: rect.bottom - parentRect.top,
           right: rect.right - parentRect.left,
-          id: uuid(),
-        })
+        }
+        dispatch(selectText(rectInContainerCoordinates))
       }
     }
   }, [])
-
-  const clearSelection = useCallback(() => {
-    document.getSelection()?.removeAllRanges()
-    setSelection(null)
-  }, [])
-
-  return [selection, clearSelection]
 }
 
 function rangeRect(range: Range): DOMRect {
