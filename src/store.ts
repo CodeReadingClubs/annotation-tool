@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit'
+import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
 import {
   TypedUseSelectorHook,
   useDispatch as ogUseDispatch,
@@ -27,8 +27,11 @@ const undoableReducer = undoable(
   emptyAnnotations,
 )
 const undoablePersistedReducer = persistReducer(persistConfig, undoableReducer)
+
+const middleware = getDefaultMiddleware({ serializableCheck: false })
 const store = configureStore({
   reducer: undoablePersistedReducer,
+  middleware,
 })
 
 export default store
