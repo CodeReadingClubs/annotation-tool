@@ -4,9 +4,13 @@ import {
   useDispatch as ogUseDispatch,
   useSelector as ogUseSelector,
 } from 'react-redux'
-import reducer, { State } from './reducer'
+import reducer, { isUndoableAction, State, undoableSlice } from './reducer'
+import undoable from './undoable'
 
-const store = configureStore({ reducer })
+const wrappedReducer = undoable(reducer, undoableSlice, isUndoableAction)
+const store = configureStore({
+  reducer: wrappedReducer,
+})
 
 export default store
 

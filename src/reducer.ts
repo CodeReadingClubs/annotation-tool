@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { AnyAction, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { v4 as uuid } from 'uuid'
 import colors from './colors'
 import { Arrow, Marker, Point, Rect } from './types'
@@ -128,3 +128,24 @@ export const {
   toggleLineAnnotation,
   setShowStraightArrows,
 } = actions
+
+const undoableActions = new Set([
+  addMarker.type,
+  removeMarker.type,
+  addArrow.type,
+  removeArrow.type,
+  toggleLineAnnotation.type,
+])
+
+export function isUndoableAction(action: AnyAction): boolean {
+  return undoableActions.has(action.type)
+}
+
+export function undoableSlice({
+  markers,
+  arrows,
+  lineAnnotations,
+  colors,
+}: State) {
+  return { markers, arrows, lineAnnotations, colors }
+}

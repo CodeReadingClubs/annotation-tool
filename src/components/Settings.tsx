@@ -1,6 +1,7 @@
 import React from 'react'
 import { setShowStraightArrows } from '../reducer'
 import { useDispatch, useSelector } from '../store'
+import { redo, undo } from '../undoable'
 
 export default function Settings() {
   const dispatch = useDispatch()
@@ -15,6 +16,8 @@ export default function Settings() {
         onChange={(e) => dispatch(setShowStraightArrows(e.target.checked))}
       />
       <label htmlFor='straight-arrows'>Use straight arrows</label>
+      <button onClick={() => dispatch(undo())}>undo</button>
+      <button onClick={() => dispatch(redo())}>redo</button>
     </div>
   )
 }
