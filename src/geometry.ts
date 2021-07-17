@@ -47,7 +47,7 @@ export function arrowAngleForPoints(points: Point[]): number | null {
   const lastPoint = points[n - 1]
   const secondToLastPoint = findLast(
     points,
-    (pt) => distanceBetweenPoints(pt, lastPoint) > 4,
+    (pt) => distanceBetweenPoints(pt, lastPoint) > 5,
   )
   if (!secondToLastPoint) {
     return null

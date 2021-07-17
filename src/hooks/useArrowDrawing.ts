@@ -76,7 +76,7 @@ export default function useArrowDrawing(
 
       const newMidPoints =
         !showStraightArrows &&
-        distanceBetweenPoints(currentPoint, lastPoint) > 3
+        distanceBetweenPoints(currentPoint, lastPoint) > 5
           ? [...drag.midPoints, currentPoint]
           : drag.midPoints
 
