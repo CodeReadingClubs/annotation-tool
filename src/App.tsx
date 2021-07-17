@@ -167,9 +167,10 @@ function SelectionPopover() {
               key={color}
               className='color-button'
               style={{ '--color': color } as React.CSSProperties}
-              onClick={() =>
+              onClick={() => {
+                dispatch(clearSelection())
                 dispatch(addMarker({ rect: currentSelection.rect, color }))
-              }
+              }}
             />
           ))}
         </Popover>
