@@ -1,4 +1,5 @@
 import React, { MouseEvent } from 'react'
+import colors from './colors'
 import Arrow from './components/Arrow'
 import Code from './components/Code'
 import MarkerRect from './components/MarkerRect'
@@ -31,7 +32,6 @@ const code = `function configFromInput(config) {
     }
 }
 `
-const colors = ['lightblue', 'lightgreen', 'gold', 'pink']
 
 export default function App() {
   const containerRef = React.useRef<HTMLDivElement | null>(null)
