@@ -7,7 +7,7 @@ import { Popover } from './components/Popover'
 import useLines from './hooks/useLines'
 import useTextSelection from './hooks/useTextSelection'
 import { Line, Marker, Point, Selection } from './types'
-import { pointFromEvent } from './util'
+import { pointFromEvent, toggleSetMember } from './util'
 
 const code = `function configFromInput(config) {
     var input = config._i;
@@ -44,6 +44,9 @@ export default function App() {
     line: Line
     point: Point
   } | null>(null)
+  const [lineAnnotations, setLineAnnotations] = React.useState<
+    Map<number, Set<string>>
+  >(new Map())
 
   const {
     lines,
@@ -82,6 +85,16 @@ export default function App() {
     setSelectedLine(null)
   }
 
+  const toggleLineAnnotation = (line: number, color: string) => {
+    const annotationsForLine = lineAnnotations.get(line)
+    const newAnnotations = new Map(lineAnnotations)
+    newAnnotations.set(
+      line,
+      toggleSetMember(lineAnnotations.get(line) ?? new Set(), color),
+    )
+    setLineAnnotations(newAnnotations)
+  }
+
   return (
     <div>
       <div>
@@ -94,7 +107,11 @@ export default function App() {
         <label htmlFor='straight-arrows'>Use straight arrows</label>
       </div>
       <div className='container' ref={containerRef}>
-        <Code code={code} />
+        <Code
+          code={code}
+          annotations={lineAnnotations}
+          toggleAnnotation={toggleLineAnnotation}
+        />
         <svg
           style={{
             pointerEvents: currentlyDragging ? 'auto' : 'none',

@@ -49,3 +49,13 @@ export function pointFromEvent(event: MouseEvent, container: HTMLElement) {
     y: event.clientY - containerRect.top,
   }
 }
+
+export function toggleSetMember<T>(set: Set<T>, member: T): Set<T> {
+  const newSet = new Set(set)
+  if (set.has(member)) {
+    newSet.delete(member)
+  } else {
+    newSet.add(member)
+  }
+  return newSet
+}

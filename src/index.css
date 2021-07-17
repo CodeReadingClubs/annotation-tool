@@ -65,16 +65,31 @@ body {
 
 .code-container {
   display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: baseline;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
   font-family: 'Roboto Mono', monospace;
-  column-gap: 18px;
   row-gap: 6px;
 }
 
 .line-number {
   color: gray;
   text-align: right;
+  margin-right: 18px;
+  margin-left: 6px;
+}
+
+.line-annotations:not(:hover) .color-button:not(.color-button--active) {
+  opacity: 0;
+}
+
+.line-annotations:hover .color-button:not(.color-button--active):not(:hover) {
+  opacity: 0.5;
+}
+
+.line-annotations .color-button {
+  border-radius: 1000px;
+  width: 15px;
+  height: 15px;
 }
 
 pre {
