@@ -1,4 +1,5 @@
 import { AnyAction, createAction, Reducer } from '@reduxjs/toolkit'
+import { useSelector } from 'react-redux'
 
 type StateWrapper<State extends StateSlice, StateSlice> = State & {
   past: StateSlice[]
@@ -70,4 +71,18 @@ export default function undoable<
       }
     }
   }
+}
+
+export function useCanUndoRedo<State extends StateSlice, StateSlice>(): {
+  canUndo: boolean
+  canRedo: boolean
+} {
+  const canUndo = useSelector(
+    (state: StateWrapper<State, StateSlice>) => state.past.length > 0,
+  )
+  const canRedo = useSelector(
+    (state: StateWrapper<State, StateSlice>) => state.future.length > 0,
+  )
+
+  return { canUndo, canRedo }
 }
