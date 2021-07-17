@@ -6,6 +6,7 @@ import MarkerRect from './components/MarkerRect'
 import { Popover } from './components/Popover'
 import Settings from './components/Settings'
 import useArrowDrawing from './hooks/useArrowDrawing'
+import useKeyboardUndoRedo from './hooks/useKeyboardUndoRedo'
 import useTextSelection from './hooks/useTextSelection'
 import {
   addMarker,
@@ -45,6 +46,7 @@ const code = `function configFromInput(config) {
 export default function App() {
   const containerRef = React.useRef<HTMLDivElement | null>(null)
   useTextSelection(containerRef)
+  useKeyboardUndoRedo()
   const dispatch = useDispatch()
   const { currentSelection, markers, arrows, colors, showStraightArrows } =
     useSelector((state) => state, shallowEqual)
