@@ -1,6 +1,6 @@
 import React, { MouseEvent, useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
-import { distanceBetweenPoints } from '../geometry'
+import { distanceBetweenPoints, pointOnLineNearLine } from '../geometry'
 import { addArrow } from '../reducer'
 import { useDispatch, useSelector } from '../store'
 import { Arrow, Marker, UnfinishedArrow } from '../types'
@@ -41,14 +41,15 @@ export default function useArrowDrawing(
     (event: MouseEvent, target: Marker | Arrow) => {
       event.preventDefault()
       const currentPoint = pointFromEvent(event, containerRef.current!)
-      const marker = 'fromMarker' in target ? target.fromMarker : target
-      const dependencies =
-        'dependencies' in target
-          ? { ...target.dependencies, [target.id]: true, [marker.id]: true }
-          : { [marker.id]: true }
+      const { fromPoint, fromMarker, dependencies } = dragStartProperties(
+        event,
+        target,
+        showStraightArrows,
+        containerRef,
+      )
       setDrag({
-        fromMarker: marker,
-        fromPoint: currentPoint,
+        fromPoint,
+        fromMarker,
         midPoints: [],
         toPoint: currentPoint,
         toMarker: null,
@@ -132,5 +133,34 @@ export default function useArrowDrawing(
         onMouseDown: (e, arrow) => onMouseDown(e, arrow),
       },
     },
+  }
+}
+
+function dragStartProperties(
+  event: MouseEvent,
+  target: Arrow | Marker,
+  straight: boolean,
+  containerRef: React.MutableRefObject<SVGSVGElement | null>,
+): Pick<UnfinishedArrow, 'fromPoint' | 'fromMarker' | 'dependencies'> {
+  const currentPoint = pointFromEvent(event, containerRef.current!)
+
+  if ('fromMarker' in target) {
+    return {
+      fromPoint: straight
+        ? pointOnLineNearLine(target.fromPoint, target.toPoint, currentPoint)
+        : currentPoint,
+      fromMarker: target.fromMarker,
+      dependencies: {
+        ...target.dependencies,
+        [target.id]: true,
+        [target.fromMarker.id]: true,
+      },
+    }
+  } else {
+    return {
+      fromPoint: currentPoint,
+      fromMarker: target,
+      dependencies: { [target.id]: true },
+    }
   }
 }

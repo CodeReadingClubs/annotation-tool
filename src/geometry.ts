@@ -122,3 +122,19 @@ function verticalLineIntersection(
     return null
   }
 }
+
+export function pointOnLineNearLine(
+  p1: Point,
+  p2: Point,
+  { x: x0, y: y0 }: Point,
+): Point {
+  const a = p2.y - p1.y
+  const b = p1.x - p2.x
+  const c = p1.y * p2.x - p1.x * p2.y
+
+  const denom = a * a + b * b
+  const paren = a * y0 - b * x0
+  const x = (-b * paren - a * c) / denom
+  const y = (a * paren - b * c) / denom
+  return { x, y }
+}
