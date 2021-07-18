@@ -55,6 +55,9 @@ const { reducer, actions } = createSlice({
   name: 'state',
   initialState,
   reducers: {
+    setCode(state, action: PayloadAction<string>) {
+      state.code = action.payload
+    },
     selectText(state, action: PayloadAction<Rect>) {
       state.currentSelection = { type: 'text', rect: action.payload }
     },
@@ -116,6 +119,7 @@ function removeArrowsWithDependency(arrows: Arrow[], id: string): Arrow[] {
 
 export default reducer
 export const {
+  setCode,
   selectText,
   addMarker,
   selectMarker,
