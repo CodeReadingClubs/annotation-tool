@@ -14,7 +14,7 @@ export function pointArrayForArrow(
     : [arrow.fromPoint, ...arrow.midPoints, arrow.toPoint]
 
   const marker = arrow.toMarker
-  if (!marker) {
+  if (!marker || allPoints.every((pt) => !isPointInRect(pt, marker))) {
     return allPoints
   }
 
@@ -137,4 +137,11 @@ export function pointOnLineNearLine(
   const x = (-b * paren - a * c) / denom
   const y = (a * paren - b * c) / denom
   return { x, y }
+}
+
+export function isPointInRect(
+  { x, y }: Point,
+  { top, bottom, left, right }: Rect,
+): boolean {
+  return isMonotonous(left, x, right) && isMonotonous(top, y, bottom)
 }

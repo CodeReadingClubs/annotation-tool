@@ -20,9 +20,7 @@ npm run dev
 - Add other color schemes
 - Dynamically fetch the code to display (currently it's a static string)
 - Handle zoom (currently making the text bigger/smaller results in the markers
-  drifting from the text. plus, at least in safari if you pinch to zoom and try
-  to draw an arrow it crashes because the arrow is in different coordinates than
-  its destination marker)
+  drifting from the text
 - Optimize undo/redo (right now it duplicates state. it can be more efficient to
   save diffs. this should only be done if it proves to be a problem for actual
   people)
