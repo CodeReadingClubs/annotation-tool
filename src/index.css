@@ -1,5 +1,5 @@
 body {
-  margin: 20px;
+  margin: 2rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -10,7 +10,7 @@ body {
 
 .container {
   position: relative;
-  margin-top: 20px;
+  margin-top: 2rem;
 }
 
 .container svg {
@@ -32,32 +32,32 @@ body {
   top: var(--top);
   left: var(--left);
   transform: var(--transform);
-  margin-top: 10px;
+  margin-top: 1rem;
   background: gray;
-  border-radius: 3px;
-  padding: 3px;
+  border-radius: 0.25rem;
+  padding: 0.125rem;
 }
 
 .popover::after {
   content: '';
   position: absolute;
   bottom: 100%;
-  left: calc(50% - 5px);
-  width: 10px;
-  height: 8px;
+  left: calc(50% - 0.25rem);
+  width: 0.5rem;
+  height: 0.4rem;
   background: gray;
   clip-path: polygon(0% 100%, 100% 100%, 50% 0%);
 }
 
 .color-button {
   --color: red;
-  width: 20px;
-  height: 20px;
-  margin: 3px;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0.125rem;
   padding: 0;
   border: 0;
   background: var(--color);
-  border-radius: 3px;
+  border-radius: 0.125rem;
 }
 
 .code-container {
@@ -65,14 +65,14 @@ body {
   grid-template-columns: auto auto 1fr;
   align-items: center;
   font-family: 'Roboto Mono', monospace;
-  row-gap: 6px;
+  row-gap: 0.5rem;
 }
 
 .line-number {
   color: gray;
   text-align: right;
-  margin-right: 18px;
-  margin-left: 6px;
+  margin-right: 0.5rem;
+  margin-left: 0.25rem;
 }
 
 .line-annotations:not(:hover) .color-button:not(.color-button--active) {
@@ -84,9 +84,9 @@ body {
 }
 
 .line-annotations .color-button {
-  border-radius: 1000px;
-  width: 15px;
-  height: 15px;
+  border-radius: 1000rem;
+  width: 1rem;
+  height: 1rem;
 }
 
 pre {
