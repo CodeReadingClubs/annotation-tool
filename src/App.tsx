@@ -1,6 +1,6 @@
 import React from 'react'
-import AnnotationPage from './components/AnnotationPage'
-import SourceSelectionPage from './components/SourceSelectionPage'
+import AnnotationPage from './pages/AnnotationPage'
+import SourceSelectionPage from './pages/SourceSelectionPage'
 import { useSelector } from './store'
 
 export default function App() {
