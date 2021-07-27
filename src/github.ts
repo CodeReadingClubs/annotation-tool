@@ -39,6 +39,9 @@ export async function fetchCode({
 
   const contentsJson = await contentsResponse.json()
   const downloadUrl = contentsJson.download_url
+  if (!downloadUrl) {
+    throw new Error(`There was a problem fetching the code from GitHub`)
+  }
   const codeResponse = await fetch(downloadUrl)
   return await codeResponse.text()
 }
@@ -51,10 +54,6 @@ export function fileHash(file: File): string {
   return LZString.compressToEncodedURIComponent(pathForFile(file))
 }
 
-export function parseFileHash(hash: string): string {
-  const parsedHash = LZString.decompressFromEncodedURIComponent(hash)
-  if (!parsedHash) {
-    throw new Error(`Couldn't parse file hash: ${hash}`)
-  }
-  return parsedHash
+export function parseFileHash(hash: string): string | null {
+  return LZString.decompressFromEncodedURIComponent(hash)
 }

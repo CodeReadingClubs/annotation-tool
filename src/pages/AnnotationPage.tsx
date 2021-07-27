@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Provider } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { PersistGate } from 'redux-persist/integration/react'
@@ -11,13 +11,28 @@ import useKeyboardUndoHandler from '../hooks/useKeyboardUndoHandler'
 import { setCode } from '../reducer'
 import createStore, { useDispatch, useSelector } from '../store'
 
-function useFilePath(): string {
-  const { hash } = useParams<{ hash: string }>()
+function useFilePath(): string | null {
+  const { hash } = useParams<{ hash?: string }>()
+  if (!hash) {
+    return null
+  }
   return github.parseFileHash(hash)
+}
+
+function useFile(): github.File | null {
+  const filePath = useFilePath()
+  if (!filePath) {
+    return null
+  }
+
+  return useMemo(() => github.parsePath(filePath), [filePath])
 }
 
 export default function AnnotationPageWrapper() {
   const filePath = useFilePath()
+  if (!filePath) {
+    return <div>Something's wrong with the url.</div>
+  }
   const { store, persistor } = createStore(filePath)
 
   return (
@@ -40,21 +55,22 @@ function AnnotationPage() {
 }
 
 function LoadingPage() {
-  const filePath = useFilePath()
+  const file = useFile()
   const dispatch = useDispatch()
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    const file = github.parsePath(filePath)
     if (!file) {
       setError(new Error(`Can't parse file path`))
       return
     }
     github
       .fetchCode(file)
-      .then((code) => dispatch(setCode(code)))
+      .then((code) => {
+        dispatch(setCode(code))
+      })
       .catch((error) => setError(error))
-  }, [])
+  }, [file])
 
   if (error) {
     return (
