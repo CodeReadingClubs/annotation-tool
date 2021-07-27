@@ -1,3 +1,5 @@
+import LZString from 'lz-string'
+
 export type File = {
   owner: string
   repo: string
@@ -46,9 +48,13 @@ function pathForFile(file: File): string {
 }
 
 export function fileHash(file: File): string {
-  return btoa(pathForFile(file))
+  return LZString.compressToEncodedURIComponent(pathForFile(file))
 }
 
 export function parseFileHash(hash: string): string {
-  return atob(hash)
+  const parsedHash = LZString.decompressFromEncodedURIComponent(hash)
+  if (!parsedHash) {
+    throw new Error(`Couldn't parse file hash: ${hash}`)
+  }
+  return parsedHash
 }
