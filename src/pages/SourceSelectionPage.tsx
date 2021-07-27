@@ -25,7 +25,9 @@ export default function SourceSelectionPage() {
   return (
     <form onSubmit={onSubmit}>
       <input value={url} onChange={onType} />
-      {file === null && <p role='alert'>that's not a github file url</p>}
+      {url !== '' && file === null && (
+        <p role='alert'>that's not a github file url</p>
+      )}
       <button disabled={file === null}>Annotate</button>
     </form>
   )
