@@ -1,4 +1,4 @@
-type File = {
+export type File = {
   owner: string
   repo: string
   commitSha: string
@@ -39,4 +39,16 @@ export async function fetchCode({
   const downloadUrl = contentsJson.download_url
   const codeResponse = await fetch(downloadUrl)
   return await codeResponse.text()
+}
+
+function pathForFile(file: File): string {
+  return `${file.owner}/${file.repo}/blob/${file.commitSha}/${file.path}`
+}
+
+export function fileHash(file: File): string {
+  return btoa(pathForFile(file))
+}
+
+export function parseFileHash(hash: string): string {
+  return atob(hash)
 }

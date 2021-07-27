@@ -1,9 +1,11 @@
 import React, { ChangeEvent, FormEvent, useCallback, useState } from 'react'
+import { useHistory } from 'react-router-dom'
 import * as github from '../github'
 
 export default function SourceSelectionPage() {
   const [url, setUrl] = useState('')
   const file = github.parsePath(url)
+  const history = useHistory()
 
   const onSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
@@ -11,7 +13,7 @@ export default function SourceSelectionPage() {
       if (!file) {
         return
       }
-      // TODO: do something with the file
+      history.push(`/file/${github.fileHash(file)}`)
     },
     [url],
   )

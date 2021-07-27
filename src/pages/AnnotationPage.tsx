@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Provider } from 'react-redux'
+import { useParams } from 'react-router-dom'
 import { PersistGate } from 'redux-persist/integration/react'
 import Code from '../components/Code'
 import Controls from '../components/Controls'
@@ -10,10 +11,13 @@ import useKeyboardUndoHandler from '../hooks/useKeyboardUndoHandler'
 import { setCode } from '../reducer'
 import createStore, { useDispatch, useSelector } from '../store'
 
-const filePath =
-  'CodeReadingClubs/www/blob/908de054006934a071f770906119ce6d35a5a612/package.json'
+function useFilePath(): string {
+  const { hash } = useParams<{ hash: string }>()
+  return github.parseFileHash(hash)
+}
 
 export default function AnnotationPageWrapper() {
+  const filePath = useFilePath()
   const { store, persistor } = createStore(filePath)
 
   return (
@@ -36,6 +40,7 @@ function AnnotationPage() {
 }
 
 function LoadingPage() {
+  const filePath = useFilePath()
   const dispatch = useDispatch()
   const [error, setError] = useState<Error | null>(null)
 

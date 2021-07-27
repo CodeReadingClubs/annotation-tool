@@ -1,13 +1,19 @@
 import React from 'react'
+import { HashRouter as Router, Route, Switch } from 'react-router-dom'
 import AnnotationPage from './pages/AnnotationPage'
 import SourceSelectionPage from './pages/SourceSelectionPage'
 
 export default function App() {
-  const hasCode = true
-
-  if (hasCode) {
-    return <AnnotationPage />
-  } else {
-    return <SourceSelectionPage />
-  }
+  return (
+    <Router>
+      <Switch>
+        <Route exact path='/'>
+          <SourceSelectionPage />
+        </Route>
+        <Route exact path='/file/:hash'>
+          <AnnotationPage />
+        </Route>
+      </Switch>
+    </Router>
+  )
 }
