@@ -42,7 +42,7 @@ type Selection =
   | { type: 'arrow'; arrow: Arrow; point: Point }
 
 const initialState: State = {
-  code,
+  code: null,
   currentSelection: null,
   markers: [],
   arrows: [],
