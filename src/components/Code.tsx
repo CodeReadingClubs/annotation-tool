@@ -13,6 +13,9 @@ export default function Code() {
     }),
     shallowEqual,
   )
+  if (!code) {
+    return <div>Loading code...</div>
+  }
   const lines = code.split('\n')
 
   return (

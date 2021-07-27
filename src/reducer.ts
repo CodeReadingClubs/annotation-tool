@@ -27,7 +27,7 @@ const code = `function configFromInput(config) {
 `
 
 export type State = {
-  code: string
+  code: string | null
   currentSelection: Selection | null
   markers: Marker[]
   arrows: Arrow[]
