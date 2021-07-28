@@ -93,3 +93,8 @@ pre {
   margin: 0;
   font-size: 1rem;
 }
+
+.file-form input {
+  width: 40rem;
+  max-width: 95%;
+}
