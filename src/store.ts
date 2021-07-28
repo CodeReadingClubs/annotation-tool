@@ -27,7 +27,7 @@ export default function createStore(filePath: string) {
   const persistConfig = {
     key: `state:${filePath}`,
     storage,
-    blacklist: ['past', 'future'],
+    whitelist: ['code', 'markers', 'arrows', 'lineAnnotations'],
   }
   const undoablePersistedReducer = persistReducer(
     persistConfig,
