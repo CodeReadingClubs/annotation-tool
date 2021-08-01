@@ -9,7 +9,7 @@ export default function Controls() {
   const { canUndo, canRedo } = useCanUndoRedo()
 
   return (
-    <div>
+    <div className='annotation-controls'>
       <input
         type='checkbox'
         id='straight-arrows'

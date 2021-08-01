@@ -8,6 +8,19 @@ body {
   font-size: 16px;
 }
 
+@media print {
+  .annotation-controls {
+    display: none;
+  }
+
+  .color-button {
+    // `color-adjust: exact` makes it so the browser doesn't ignore the
+    // background color when it prints.
+    color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
 .container {
   position: relative;
   margin-top: 2rem;
@@ -76,6 +89,9 @@ body {
 }
 
 .line-annotations {
+  display: flex;
+  flex-direction: row;
+
   .color-button {
     border-radius: 1000rem;
     width: 1rem;

@@ -16,8 +16,6 @@ Netlify.
 
 ## Missing features
 
-- Export as pdf (or at least add some `@media print` style selectors so it looks
-  nicer when printing)
 - Add other color schemes
 - Handle zoom (currently making the text bigger/smaller results in the markers
   drifting from the text
