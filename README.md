@@ -2,6 +2,8 @@
 
 A tool to annotate code for [code reading clubs](https://code-reading.org).
 
+[Check it out](https://crc-annotations.netlify.app)
+
 ## Running
 
 ```shell
