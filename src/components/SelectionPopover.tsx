@@ -1,11 +1,6 @@
 import React from 'react'
 import { shallowEqual } from 'react-redux'
-import {
-  addMarker,
-  clearSelection,
-  removeArrow,
-  removeMarker,
-} from '../reducer'
+import { addMarker, removeArrow, removeMarker } from '../reducer'
 import { useDispatch, useSelector } from '../store'
 import { Popover } from './Popover'
 
@@ -35,10 +30,9 @@ export default function SelectionPopover() {
               key={color}
               className='color-button'
               style={{ '--color': color } as React.CSSProperties}
-              onClick={() => {
-                dispatch(clearSelection())
+              onClick={() =>
                 dispatch(addMarker({ rect: currentSelection.rect, color }))
-              }}
+              }
             />
           ))}
         </Popover>

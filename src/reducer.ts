@@ -68,9 +68,6 @@ const { reducer, actions } = createSlice({
       state.currentSelection = { type: 'arrow', ...action.payload }
     },
     clearSelection(state) {
-      if (state.currentSelection?.type === 'text') {
-        document.getSelection()?.removeAllRanges()
-      }
       state.currentSelection = null
     },
     removeMarker(state, action: PayloadAction<Marker>) {
@@ -85,6 +82,9 @@ const { reducer, actions } = createSlice({
       state.currentSelection = null
     },
     addMarker(state, action: PayloadAction<{ rect: Rect; color: string }>) {
+      if (state.currentSelection?.type === 'text') {
+        document.getSelection()?.removeAllRanges()
+      }
       state.markers.push({
         ...action.payload.rect,
         color: action.payload.color,
