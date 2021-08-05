@@ -86,6 +86,9 @@ body {
   text-align: right;
   margin-right: 0.5rem;
   margin-left: 0.25rem;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
 }
 
 .line-annotations {
