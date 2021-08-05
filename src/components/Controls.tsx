@@ -2,6 +2,7 @@ import React from 'react'
 import { setShowStraightArrows } from '../reducer'
 import { useDispatch, useSelector } from '../store'
 import { redo, reset, undo, useCanUndoRedo } from '../undoable'
+import Export from './Export'
 
 export default function Controls() {
   const dispatch = useDispatch()
@@ -26,6 +27,7 @@ export default function Controls() {
         </button>
         <button onClick={() => dispatch(reset())}>clear</button>
       </div>
+      <Export />
     </div>
   )
 }
