@@ -18,14 +18,15 @@ export default function useTextSelectionHandler(
     if (
       !selection ||
       selection.type !== 'Range' ||
-      selection.anchorNode?.parentElement?.className !== 'code-line' ||
-      selection.toString().includes('\n')
+      (selection.anchorNode?.parentElement?.className !== 'code-line' &&
+        selection.focusNode?.parentElement?.className !== 'code-line') ||
+      selection.toString().trim().includes('\n')
     ) {
       if (isTextCurrentlySelected) {
         dispatch(clearSelection())
       }
     } else {
-      const rect = rangeRect(selection.getRangeAt(0))
+      const rect = selectionRect(selection)
       const parentRect = containerRef.current.getBoundingClientRect()
       const rectInContainerCoordinates = {
         top: rect.top - parentRect.top,
@@ -42,13 +43,27 @@ export default function useTextSelectionHandler(
   return handler
 }
 
-function rangeRect(range: Range): DOMRect {
+function selectionRect(selection: Selection): DOMRect {
+  const range = selection.getRangeAt(0)
   const rects = Array.from(range.getClientRects()).filter(
     (rect) => rect.width > 0 && rect.height > 0,
   )
-  if (rects.length !== 1) {
-    throw new Error(`Can't deal with range with ${rects.length} rects`)
+  switch (rects.length) {
+    case 1: {
+      return rects[0]
+    }
+    case 2: {
+      const selectionString = selection.toString()
+      if (selectionString.startsWith('\n')) {
+        return rects[1]
+      } else if (selectionString.endsWith('\n')) {
+        return rects[0]
+      }
+    }
+    default: {
+      throw new Error(
+        `Can't deal with a selection that has with ${rects.length} rects`,
+      )
+    }
   }
-
-  return rects[0]
 }
