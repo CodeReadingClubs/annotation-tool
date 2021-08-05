@@ -1,69 +1,56 @@
-import html2canvas from 'html2canvas'
-import React, { useState } from 'react'
+import React from 'react'
+import useExport, { CopyState, DownloadState } from '../hooks/useExport'
 
 export default function Export() {
-  const copyImage = () => {
-    copyContainer().catch((error) => console.error(error))
-  }
-  const saveImage = () => {
-    downloadContainer().catch((error) => console.error(error))
-  }
+  const { copy, download, copyState, downloadState } = useExport()
+
   return (
     <div>
       {navigator.clipboard.write && (
-        <button onClick={copyImage}>copy as image</button>
+        <button
+          disabled={copyState === 'preparing' || copyState === 'success'}
+          onClick={copy}
+        >
+          {copyButtonTitle(copyState)}
+        </button>
       )}
-      <button onClick={saveImage}>save as image</button>
+      <button disabled={downloadState === 'preparing'} onClick={download}>
+        {downloadButtonTitle(downloadState)}
+      </button>
+      {(copyState === 'failure' || downloadState === 'failure') && (
+        <p role='alert'>Something went wrong. Try again later</p>
+      )}
     </div>
   )
 }
 
-async function copyContainer() {
-  if (navigator.clipboard.write) {
-    const clipboardItem = new ClipboardItem({
-      'image/png': containerAsCanvas().then(canvasToBlob),
-    })
-    await navigator.clipboard.write([clipboardItem])
-  } else {
-    throw new Error(`Can't use clipboard API`)
+function copyButtonTitle(copyState: CopyState): string {
+  switch (copyState) {
+    case 'idle': {
+      return 'copy as png'
+    }
+    case 'preparing': {
+      return 'preparing...'
+    }
+    case 'failure': {
+      return 'copy as png'
+    }
+    case 'success': {
+      return 'copied!'
+    }
   }
 }
 
-async function downloadContainer() {
-  const canvas = await containerAsCanvas()
-  await downloadCanvas(canvas)
-}
-
-async function containerAsCanvas(): Promise<HTMLCanvasElement> {
-  const container = document.getElementsByClassName(
-    'container',
-  )[0] as HTMLElement
-  if (!container) {
-    throw new Error(`Couldn't find container element`)
+function downloadButtonTitle(downloadState: DownloadState): string {
+  switch (downloadState) {
+    case 'idle': {
+      return 'download as png'
+    }
+    case 'preparing': {
+      return 'preparing...'
+    }
+    case 'failure': {
+      return 'download as png'
+    }
   }
-  const canvas = await html2canvas(container)
-  return canvas
-}
-
-function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        reject(new Error(`Couldn't convert canvas to blob`))
-      } else {
-        resolve(blob)
-      }
-    }, 'image/png')
-  })
-}
-
-async function downloadCanvas(canvas: HTMLCanvasElement) {
-  const image = canvas.toDataURL('image/png')
-  const href = image.replace('image/png', 'octet/stream')
-  const a = document.createElement('a')
-  a.href = href
-  a.download = 'code.png'
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
 }
