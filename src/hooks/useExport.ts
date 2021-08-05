@@ -36,13 +36,34 @@ export default function useExport(): ReturnType {
 }
 
 async function copyContainer() {
-  if (navigator.clipboard.write) {
+  if (!navigator.clipboard.write) {
+    throw new Error(`Can't use clipboard API`)
+  }
+  try {
     const clipboardItem = new ClipboardItem({
       'image/png': containerAsCanvas().then(canvasToBlob),
     })
     await navigator.clipboard.write([clipboardItem])
-  } else {
-    throw new Error(`Can't use clipboard API`)
+  } catch (error) {
+    // Safari only allows access to the clipboard in user events, but async
+    // functions inside user events (like awaiting the creation of a
+    // canvas-image blob) aren't considered user-event context,
+    // even if those promises were fired in an event handler.
+    // The way to work around this is to initialize ClipboardItem with a
+    // Promise<Blob>. HOWEVER, this doesn't work in Chromium, so we need this
+    // highly fragile workaround.
+    if (
+      error.message ===
+      "Failed to construct 'ClipboardItem': Failed to convert value to 'Blob'."
+    ) {
+      const blob = await containerAsCanvas().then(canvasToBlob)
+      const clipboardItem = new ClipboardItem({
+        'image/png': blob,
+      })
+      await navigator.clipboard.write([clipboardItem])
+    } else {
+      throw error
+    }
   }
 }
 
