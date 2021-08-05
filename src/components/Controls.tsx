@@ -12,7 +12,7 @@ export default function Controls() {
   const copyImage = () => {
     if (navigator.clipboard.write) {
       const clipboardItem = new ClipboardItem({
-        'image/png': containerAsImageBlob(),
+        'image/png': containerAsCanvas().then(canvasToBlob),
       })
       navigator.clipboard
         .write([clipboardItem])
@@ -22,15 +22,9 @@ export default function Controls() {
     }
   }
   const saveImage = () => {
-    // containerAsImageBlob()
-    //   .then((blob) => {})
-    //   .catch((error) => console.error(error))
-    containerAsImageBlob()
-      .then(() => {
-        return navigator.clipboard.writeText('pizza')
-      })
-      .then(() => console.log('good'))
-      .catch(console.error)
+    containerAsCanvas()
+      .then(downloadCanvas)
+      .catch((error) => console.error(error))
   }
   return (
     <div className='annotation-controls'>
@@ -60,7 +54,7 @@ export default function Controls() {
   )
 }
 
-async function containerAsImageBlob(): Promise<Blob> {
+async function containerAsCanvas(): Promise<HTMLCanvasElement> {
   const container = document.getElementsByClassName(
     'container',
   )[0] as HTMLElement
@@ -68,8 +62,7 @@ async function containerAsImageBlob(): Promise<Blob> {
     throw new Error(`Couldn't find container element`)
   }
   const canvas = await html2canvas(container)
-  const blob = await canvasToBlob(canvas)
-  return blob
+  return canvas
 }
 
 function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
@@ -86,4 +79,16 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
       0.9,
     )
   })
+}
+
+function downloadCanvas(canvas: HTMLCanvasElement) {
+  const a = document.createElement('a')
+  const image = canvas
+    .toDataURL('image/png')
+    .replace('image/png', 'octet/stream')
+  a.href = image
+  a.download = 'code.png'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
 }
