@@ -58,8 +58,16 @@ async function containerAsCanvas(): Promise<HTMLCanvasElement> {
   if (!container) {
     throw new Error(`Couldn't find container element`)
   }
-  const canvas = await html2canvas(container)
-  return canvas
+  const canvas = await html2canvas(container, { logging: false })
+
+  const paddedCanvas = document.createElement('canvas')
+  paddedCanvas.width = canvas.width + 40
+  paddedCanvas.height = canvas.height + 40
+  const ctx = paddedCanvas.getContext('2d')!
+  ctx.fillStyle = 'white'
+  ctx.fillRect(0, 0, paddedCanvas.width, paddedCanvas.height)
+  ctx.drawImage(canvas, 20, 20)
+  return paddedCanvas
 }
 
 function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
