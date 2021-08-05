@@ -1,3 +1,4 @@
+import html2canvas from 'html2canvas'
 import React from 'react'
 import { setShowStraightArrows } from '../reducer'
 import { useDispatch, useSelector } from '../store'
@@ -8,6 +9,29 @@ export default function Controls() {
   const showStraightArrows = useSelector((state) => state.showStraightArrows)
   const { canUndo, canRedo } = useCanUndoRedo()
 
+  const copyImage = () => {
+    if (navigator.clipboard.write) {
+      const clipboardItem = new ClipboardItem({
+        'image/png': containerAsImageBlob(),
+      })
+      navigator.clipboard
+        .write([clipboardItem])
+        .catch((error) => console.error(error))
+    } else {
+      throw new Error(`Can't use clipboard API`)
+    }
+  }
+  const saveImage = () => {
+    // containerAsImageBlob()
+    //   .then((blob) => {})
+    //   .catch((error) => console.error(error))
+    containerAsImageBlob()
+      .then(() => {
+        return navigator.clipboard.writeText('pizza')
+      })
+      .then(() => console.log('good'))
+      .catch(console.error)
+  }
   return (
     <div className='annotation-controls'>
       <input
@@ -26,6 +50,40 @@ export default function Controls() {
         </button>
         <button onClick={() => dispatch(reset())}>clear</button>
       </div>
+      <div>
+        {navigator.clipboard.write && (
+          <button onClick={copyImage}>copy as image</button>
+        )}
+        <button onClick={saveImage}>save as image</button>
+      </div>
     </div>
   )
+}
+
+async function containerAsImageBlob(): Promise<Blob> {
+  const container = document.getElementsByClassName(
+    'container',
+  )[0] as HTMLElement
+  if (!container) {
+    throw new Error(`Couldn't find container element`)
+  }
+  const canvas = await html2canvas(container)
+  const blob = await canvasToBlob(canvas)
+  return blob
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error(`Couldn't convert canvas to blob`))
+        } else {
+          resolve(blob)
+        }
+      },
+      'image/png',
+      0.9,
+    )
+  })
 }
