@@ -27,7 +27,6 @@ Netlify.
   near the top/bottom)
 - Footer with link to github and a "try your own code" button
 - Share links (needs hosting :((( )
-- Download/save/copy as image/pdf
 
 ### Lower priority
 
