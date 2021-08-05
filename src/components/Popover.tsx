@@ -21,6 +21,7 @@ export function Popover({ origin, autofocus = false, children }: Props) {
     <div
       ref={ref}
       onBlur={autofocus ? () => dispatch(clearSelection()) : undefined}
+      onMouseDown={autofocus ? (event) => event.preventDefault() : undefined}
       tabIndex={autofocus ? 1 : undefined}
       className='popover'
       style={
