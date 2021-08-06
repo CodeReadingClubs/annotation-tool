@@ -7,7 +7,7 @@ import Controls from '../components/Controls'
 import SelectionPopover from '../components/SelectionPopover'
 import Svg from '../components/Svg'
 import * as github from '../github'
-import useKeyboardUndoHandler from '../hooks/useKeyboardUndoHandler'
+import useKeyboardHandler from '../hooks/useKeyboardHandler'
 import { setCode } from '../reducer'
 import createStore, { useDispatch, useSelector } from '../store'
 
@@ -82,7 +82,7 @@ function LoadingPage() {
 }
 
 function LoadedPage() {
-  const handler = useKeyboardUndoHandler()
+  const handler = useKeyboardHandler()
   useEffect(() => {
     document.onkeydown = handler
   }, [handler])
