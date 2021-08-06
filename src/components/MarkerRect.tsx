@@ -3,6 +3,7 @@ import { Marker } from '../types'
 
 type Props = {
   marker: Marker
+  selectable: boolean
   onClick: () => void
   onMouseDown: (e: MouseEvent) => void
   onMouseMove: (e: MouseEvent) => void
@@ -11,6 +12,7 @@ type Props = {
 
 export default function MarkerRect({
   marker,
+  selectable,
   onClick,
   onMouseDown,
   onMouseMove,
@@ -23,7 +25,7 @@ export default function MarkerRect({
       width={marker.width}
       height={marker.height}
       fill={marker.color}
-      style={{ pointerEvents: 'auto' }}
+      style={{ pointerEvents: selectable ? 'auto' : 'none' }}
       onClick={onClick}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
