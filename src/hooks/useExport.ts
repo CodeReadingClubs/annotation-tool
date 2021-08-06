@@ -69,7 +69,8 @@ async function copyContainer() {
 
 async function downloadContainer() {
   const canvas = await containerAsCanvas()
-  await downloadCanvas(canvas)
+  const blob = await canvasToBlob(canvas)
+  downloadBlob(blob, 'code.png')
 }
 
 async function containerAsCanvas(): Promise<HTMLCanvasElement> {
@@ -108,12 +109,11 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   })
 }
 
-async function downloadCanvas(canvas: HTMLCanvasElement) {
-  const image = canvas.toDataURL('image/png')
-  const href = image.replace('image/png', 'octet/stream')
+function downloadBlob(blob: Blob, filename: string) {
+  const href = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = href
-  a.download = 'code.png'
+  a.download = filename
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
