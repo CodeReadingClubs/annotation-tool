@@ -6,6 +6,7 @@ type Props = {
   arrow: Arrow | UnfinishedArrow
   straight: boolean
   highlighted?: boolean
+  selectable: boolean
   onClick?: (event: MouseEvent) => void
   onMouseDown?: (event: MouseEvent) => void
 }
@@ -14,6 +15,7 @@ export default function ArrowLine({
   arrow,
   straight,
   highlighted = false,
+  selectable,
   onClick,
   onMouseDown,
 }: Props) {
@@ -30,7 +32,7 @@ export default function ArrowLine({
       onClick={onClick}
       onMouseDown={onMouseDown}
       style={{
-        pointerEvents: hasMouseEvents ? 'auto' : 'none',
+        pointerEvents: selectable ? 'auto' : 'none',
         cursor: hasMouseEvents ? 'crosshair' : 'auto',
       }}
     >

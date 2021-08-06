@@ -31,11 +31,18 @@ export default function Svg() {
       onMouseMove={(e) => mouseEvents.svg.onMouseMove(e)}
       onMouseUp={(e) => mouseEvents.svg.onMouseUp(e)}
     >
-      {drag && <ArrowLine arrow={drag} straight={showStraightArrows} />}
+      {drag && (
+        <ArrowLine
+          arrow={drag}
+          straight={showStraightArrows}
+          selectable={false}
+        />
+      )}
       {arrows.map((arrow) => (
         <ArrowLine
           arrow={arrow}
           straight={showStraightArrows}
+          selectable={currentSelection?.type !== 'text'}
           onClick={(e) =>
             dispatch(
               selectArrow({
@@ -55,8 +62,9 @@ export default function Svg() {
       ))}
       {markers.map((marker) => (
         <MarkerRect
-          marker={marker}
           key={marker.id}
+          marker={marker}
+          selectable={currentSelection?.type !== 'text'}
           onClick={() => dispatch(selectMarker(marker))}
           onMouseDown={(e) => mouseEvents.marker.onMouseDown(e, marker)}
           onMouseMove={(e) => mouseEvents.marker.onMouseMove(e, marker)}
