@@ -3,22 +3,19 @@ import { clearSelection, removeArrow, removeMarker } from '../reducer'
 import { useDispatch, useSelector } from '../store'
 import { redo, undo } from '../undoable'
 
-export default function useKeyboardUndoHandler() {
+export default function useKeyboardHandler() {
   const dispatch = useDispatch()
   const currentSelection = useSelector((state) => state.currentSelection)
 
   const handler = useCallback(
     (event: KeyboardEvent) => {
-      if (
-        event.key === 'z' &&
-        (event.ctrlKey || event.metaKey) &&
-        event.shiftKey
-      ) {
+      const isMetaOn = event.ctrlKey || event.metaKey
+      if (event.key === 'z' && isMetaOn && event.shiftKey) {
         // redo
         event.preventDefault()
         event.stopPropagation()
         dispatch(redo())
-      } else if (event.key === 'z' && (event.ctrlKey || event.metaKey)) {
+      } else if (event.key === 'z' && isMetaOn) {
         // undo
         event.preventDefault()
         event.stopPropagation()

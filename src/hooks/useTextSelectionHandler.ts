@@ -61,9 +61,7 @@ function selectionRect(selection: Selection): DOMRect {
       }
     }
     default: {
-      throw new Error(
-        `Can't deal with a selection that has with ${rects.length} rects`,
-      )
+      throw new Error(`Can't handle a selection that has ${rects.length} rects`)
     }
   }
 }
