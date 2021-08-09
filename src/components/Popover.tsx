@@ -26,8 +26,8 @@ export function Popover({ origin, autofocus = false, children }: Props) {
       className='popover'
       style={
         {
-          '--top': `${origin.y}px`,
-          '--left': `${origin.x}px`,
+          '--top': `${Math.round(origin.y)}px`,
+          '--left': `${Math.round(origin.x)}px`,
           '--transform': 'translateX(-50%)',
         } as React.CSSProperties
       }
