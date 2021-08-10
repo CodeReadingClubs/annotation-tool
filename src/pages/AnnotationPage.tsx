@@ -1,32 +1,15 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Provider } from 'react-redux'
-import { useParams } from 'react-router-dom'
 import { PersistGate } from 'redux-persist/integration/react'
 import Code from '../components/Code'
 import Controls from '../components/Controls'
 import SelectionPopover from '../components/SelectionPopover'
 import Svg from '../components/Svg'
 import * as github from '../github'
+import { useFile, useFilePath } from '../hooks/useFile'
 import useKeyboardHandler from '../hooks/useKeyboardHandler'
 import { setCode } from '../reducer'
 import createStore, { useDispatch, useSelector } from '../store'
-
-function useFilePath(): string | null {
-  const { hash } = useParams<{ hash?: string }>()
-  if (!hash) {
-    return null
-  }
-  return github.parseFileHash(hash)
-}
-
-function useFile(): github.File | null {
-  const filePath = useFilePath()
-  if (!filePath) {
-    return null
-  }
-
-  return useMemo(() => github.parsePath(filePath), [filePath])
-}
 
 export default function AnnotationPageWrapper() {
   const filePath = useFilePath()
