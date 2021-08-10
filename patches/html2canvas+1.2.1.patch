@@ -6,7 +6,7 @@ index dfa7f75..fce2e79 100644
              this.path(effect.path);
              this.ctx.clip();
          }
-+        this.ctx.globalCompositeOperation = 'darken'
++        this.ctx.globalCompositeOperation = 'multiply'
          this._activeEffects.push(effect);
      };
      CanvasRenderer.prototype.popEffect = function () {

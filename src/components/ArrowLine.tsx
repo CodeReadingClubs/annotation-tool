@@ -41,7 +41,7 @@ export default function ArrowLine({
           points={pointsString}
           stroke='white'
           fill='none'
-          style={{ mixBlendMode: 'darken' }}
+          style={{ mixBlendMode: 'multiply' }}
           strokeWidth={strokeWidth * 3}
         />
       )}
