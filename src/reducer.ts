@@ -1,5 +1,6 @@
 import { AnyAction, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { v4 as uuid } from 'uuid'
+import { Color, colors } from './colors'
 import { Arrow, Marker, Point, Rect } from './types'
 
 export type State = {
@@ -7,8 +8,8 @@ export type State = {
   currentSelection: Selection | null
   markers: Marker[]
   arrows: Arrow[]
-  lineAnnotations: Record<number, Record<string, boolean>>
-  colors: string[]
+  lineAnnotations: Record<number, Record<Color, boolean>>
+  colors: Color[]
   showStraightArrows: boolean
 }
 
@@ -23,7 +24,7 @@ const initialState: State = {
   markers: [],
   arrows: [],
   lineAnnotations: {},
-  colors: ['lightblue', 'lightgreen', 'gold', 'pink'],
+  colors: colors as unknown as Color[],
   showStraightArrows: false,
 }
 
@@ -57,7 +58,7 @@ const { reducer, actions } = createSlice({
       state.arrows = removeArrowsWithDependency(state.arrows, action.payload.id)
       state.currentSelection = null
     },
-    addMarker(state, action: PayloadAction<{ rect: Rect; color: string }>) {
+    addMarker(state, action: PayloadAction<{ rect: Rect; color: Color }>) {
       if (state.currentSelection?.type === 'text') {
         document.getSelection()?.removeAllRanges()
       }
@@ -73,7 +74,7 @@ const { reducer, actions } = createSlice({
     },
     setMarkerColor(
       state,
-      action: PayloadAction<{ marker: Marker; color: string }>,
+      action: PayloadAction<{ marker: Marker; color: Color }>,
     ) {
       const marker = state.markers.find(
         ({ id }) => id === action.payload.marker.id,
@@ -86,7 +87,7 @@ const { reducer, actions } = createSlice({
     },
     setArrowColor(
       state,
-      action: PayloadAction<{ arrow: Arrow; color: string }>,
+      action: PayloadAction<{ arrow: Arrow; color: Color }>,
     ) {
       const arrow = state.arrows.find(
         ({ id }) => id === action.payload.arrow.id,
@@ -101,7 +102,7 @@ const { reducer, actions } = createSlice({
       state,
       {
         payload: { lineNumber, color },
-      }: PayloadAction<{ lineNumber: number; color: string }>,
+      }: PayloadAction<{ lineNumber: number; color: Color }>,
     ) {
       const selectedColors = state.lineAnnotations[lineNumber] ?? {}
       selectedColors[color] = !(selectedColors[color] ?? false)

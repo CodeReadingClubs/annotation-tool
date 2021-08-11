@@ -1,4 +1,5 @@
 import React, { MouseEvent } from 'react'
+import { useCssColor } from '../colors'
 import { Marker } from '../types'
 
 type Props = {
@@ -18,13 +19,14 @@ export default function MarkerRect({
   onMouseMove,
   onMouseUp,
 }: Props) {
+  const color = useCssColor(marker.color)
   return (
     <rect
       x={marker.left}
       y={marker.top}
       width={marker.width}
       height={marker.height}
-      fill={marker.color}
+      fill={color}
       style={{ pointerEvents: selectable ? 'auto' : 'none' }}
       onClick={onClick}
       onMouseDown={onMouseDown}

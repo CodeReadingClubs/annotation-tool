@@ -11,6 +11,7 @@
     "@reduxjs/toolkit": "^1.6.0",
     "html2canvas": "^1.2.1",
     "lz-string": "^1.4.4",
+    "material-colors-ts": "^1.0.4",
     "patch-package": "^6.4.7",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",

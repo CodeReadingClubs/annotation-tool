@@ -1,3 +1,5 @@
+import { Color } from './colors'
+
 export type Point = { x: number; y: number }
 
 export type Rect = {
@@ -14,7 +16,7 @@ export type Selection = Rect & {
 }
 
 export type Marker = Selection & {
-  color: string
+  color: Color
 }
 
 export type UnfinishedArrow = {
@@ -23,7 +25,7 @@ export type UnfinishedArrow = {
   midPoints: Point[]
   toPoint: Point
   toMarker: Marker | null
-  color?: string
+  color?: Color
   dependencies: Record<string, boolean>
 }
 
@@ -33,7 +35,7 @@ export type Arrow = {
   midPoints: Point[]
   toPoint: Point
   toMarker: Marker
-  color?: string
+  color?: Color
   id: string
   dependencies: Record<string, boolean>
 }

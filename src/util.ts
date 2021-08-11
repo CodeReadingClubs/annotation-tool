@@ -52,3 +52,7 @@ export function pointFromEvent(
     y: event.clientY - containerRect.top,
   }
 }
+
+// via https://stackoverflow.com/a/51399781/3813902
+export type ArrayElement<ArrayType extends readonly unknown[]> =
+  ArrayType extends readonly (infer ElementType)[] ? ElementType : never
