@@ -1,4 +1,5 @@
 import React, { MouseEvent } from 'react'
+import { useCssColor } from '../colors'
 import { arrowAngleForPoints, pointArrayForArrow } from '../geometry'
 import { Arrow, UnfinishedArrow } from '../types'
 
@@ -23,7 +24,7 @@ export default function ArrowLine({
   const endPoint = points[points.length - 1]
   const arrowAngle = arrowAngleForPoints(points)
   const pointsString = points.map(({ x, y }) => `${x},${y}`).join(' ')
-  const color = arrow.color ?? arrow.fromMarker.color
+  const color = useCssColor(arrow.color ?? arrow.fromMarker.color)
 
   const hasMouseEvents = onClick !== undefined || onMouseDown !== undefined
   const strokeWidth = highlighted ? 5 : 3

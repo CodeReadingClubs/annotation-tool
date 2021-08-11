@@ -102,7 +102,8 @@ body {
 
 .color-picker {
   display: grid;
-  grid-template-columns: repeat(4, auto);
+  grid-auto-flow: column;
+  grid-template-rows: repeat(4, auto);
 }
 
 .code-container {

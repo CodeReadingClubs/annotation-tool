@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react'
 import { shallowEqual } from 'react-redux'
+import { Color } from '../colors'
 import { toggleLineAnnotation } from '../reducer'
 import { useDispatch, useSelector } from '../store'
 
@@ -42,9 +43,9 @@ function Annotations({
   annotations,
   toggleAnnotation,
 }: {
-  colors: string[]
+  colors: Color[]
   annotations: Record<string, boolean>
-  toggleAnnotation: (color: string) => void
+  toggleAnnotation: (color: Color) => void
 }) {
   return (
     <div className='line-annotations'>

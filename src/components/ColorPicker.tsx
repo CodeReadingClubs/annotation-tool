@@ -1,9 +1,10 @@
 import React from 'react'
+import { Color, useCssColor } from '../colors'
 
 type Props = {
-  colors: string[]
-  onSelect: (color: string) => void
-  selectedColor?: string
+  colors: Color[]
+  onSelect: (color: Color) => void
+  selectedColor?: Color
 }
 
 export default function ColorPicker({
@@ -30,15 +31,16 @@ function ColorButton({
   onClick,
   selected,
 }: {
-  color: string
+  color: Color
   onClick: () => void
   selected: boolean
 }) {
+  const cssColor = useCssColor(color)
   return (
     <button
       className={`color-button ${selected ? 'color-button--selected' : ''}`}
       onClick={onClick}
-      style={{ '--color': color } as React.CSSProperties}
+      style={{ '--color': cssColor } as React.CSSProperties}
     />
   )
 }
