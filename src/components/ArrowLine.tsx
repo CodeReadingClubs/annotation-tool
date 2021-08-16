@@ -1,6 +1,6 @@
 import React, { MouseEvent } from 'react'
-import { useCssColor } from '../colors'
 import { arrowAngleForPoints, pointArrayForArrow } from '../geometry'
+import useCssColor from '../hooks/useCssColor'
 import { Arrow, UnfinishedArrow } from '../types'
 
 type Props = {

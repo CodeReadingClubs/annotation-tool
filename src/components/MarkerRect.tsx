@@ -1,5 +1,5 @@
 import React, { MouseEvent } from 'react'
-import { useCssColor } from '../colors'
+import useCssColor from '../hooks/useCssColor'
 import { Marker } from '../types'
 
 type Props = {
@@ -20,6 +20,7 @@ export default function MarkerRect({
   onMouseUp,
 }: Props) {
   const color = useCssColor(marker.color)
+
   return (
     <rect
       x={marker.left}
