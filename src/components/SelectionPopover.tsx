@@ -3,6 +3,7 @@ import { shallowEqual } from 'react-redux'
 import { addMarker, removeArrow, removeMarker } from '../reducer'
 import { useDispatch, useSelector } from '../store'
 import { Arrow, Marker, Point, Rect } from '../types'
+import ColorPicker from './ColorPicker'
 import { Popover } from './Popover'
 
 export default function SelectionPopover() {
@@ -43,14 +44,10 @@ function TextPopover({ rect }: { rect: Rect }) {
         y: rect.bottom,
       }}
     >
-      {colors.map((color) => (
-        <button
-          key={color}
-          className='color-button'
-          style={{ '--color': color } as React.CSSProperties}
-          onClick={() => dispatch(addMarker({ rect, color }))}
-        />
-      ))}
+      <ColorPicker
+        colors={colors}
+        onSelect={(color) => dispatch(addMarker({ rect, color }))}
+      />
     </Popover>
   )
 }
