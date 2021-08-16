@@ -1,5 +1,6 @@
 import React from 'react'
-import { Color, useCssColor } from '../colors'
+import { Color } from '../colors'
+import useCssColor from '../hooks/useCssColor'
 
 type Props = {
   colors: Color[]

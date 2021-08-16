@@ -22,14 +22,21 @@ export const colors = [
 
 export type Color = ArrayElement<typeof colors>
 
-function cssColorFromColor(
+export type Brightness = 'light' | 'medium' | 'dark'
+
+export function cssColorFromColor(
   color: Color | 'lightblue' | 'lightgreen' | 'gold',
+  brightness: Brightness,
 ): string {
   switch (color) {
-    case 'lightblue':
-    case 'lightgreen':
+    case 'lightblue': {
+      return cssColorFromColor('lightBlue', brightness)
+    }
+    case 'lightgreen': {
+      return cssColorFromColor('lightGreen', brightness)
+    }
     case 'gold': {
-      return color
+      return cssColorFromColor('orange', brightness)
     }
     case 'pink':
     case 'purple':
@@ -47,12 +54,22 @@ function cssColorFromColor(
     case 'orange':
     case 'deepOrange':
     case 'red': {
-      return materialColors[color][200]
+      const variant = variantForBrightness(brightness)
+      return materialColors[color][variant]
     }
   }
 }
 
-// in the future this would allow more customization such as light/dark themes
-export function useCssColor(color: Color) {
-  return cssColorFromColor(color)
+function variantForBrightness(brightness: Brightness): 100 | 200 | 300 {
+  switch (brightness) {
+    case 'light': {
+      return 100
+    }
+    case 'medium': {
+      return 200
+    }
+    case 'dark': {
+      return 300
+    }
+  }
 }

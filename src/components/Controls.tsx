@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react'
+import { Brightness } from '../colors'
 import { useFilePath } from '../hooks/useFile'
-import { setShowStraightArrows } from '../reducer'
+import { setAnnotationBrightness, setShowStraightArrows } from '../reducer'
 import { useDispatch, useSelector } from '../store'
 import { redo, reset, undo, useCanUndoRedo } from '../undoable'
 import Export from './Export'
@@ -19,8 +20,48 @@ export default function Controls() {
       />
       <label htmlFor='straight-arrows'>Use straight arrows</label>
       <UndoManagement />
+      <AnnotationBrightness />
       <Export />
       {import.meta.env.DEV && <PersistedStateDebugging />}
+    </div>
+  )
+}
+
+function AnnotationBrightness() {
+  const dispatch = useDispatch()
+  const brightness = useSelector((state) => state.annotationBrightness)
+
+  function RadioItem({ value, title }: { value: Brightness; title: string }) {
+    const id = `annotation-brightness--${value}`
+    return (
+      <>
+        <input
+          type='radio'
+          name='annotation-brightness'
+          id={id}
+          value={value}
+          checked={brightness === value}
+          onChange={(event) =>
+            dispatch(setAnnotationBrightness(event.target.value as Brightness))
+          }
+        />
+        <label htmlFor={id}>{title}</label>
+      </>
+    )
+  }
+
+  const radios: [Brightness, string][] = [
+    ['light', 'Light'],
+    ['medium', 'Medium'],
+    ['dark', 'Dark'],
+  ]
+
+  return (
+    <div>
+      <span>Annotation brightness: </span>
+      {radios.map(([value, title]) => (
+        <RadioItem value={value} title={title} key={value} />
+      ))}
     </div>
   )
 }

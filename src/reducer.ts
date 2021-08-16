@@ -1,6 +1,6 @@
 import { AnyAction, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { v4 as uuid } from 'uuid'
-import { Color, colors } from './colors'
+import { Brightness, Color, colors } from './colors'
 import { Arrow, Marker, Point, Rect } from './types'
 
 export type State = {
@@ -10,6 +10,7 @@ export type State = {
   arrows: Arrow[]
   lineAnnotations: Record<number, Record<Color, boolean>>
   colors: Color[]
+  annotationBrightness: Brightness
   showStraightArrows: boolean
 }
 
@@ -25,6 +26,7 @@ const initialState: State = {
   arrows: [],
   lineAnnotations: {},
   colors: colors as unknown as Color[],
+  annotationBrightness: 'medium',
   showStraightArrows: false,
 }
 
@@ -111,6 +113,9 @@ const { reducer, actions } = createSlice({
     setShowStraightArrows(state, action: PayloadAction<boolean>) {
       state.showStraightArrows = action.payload
     },
+    setAnnotationBrightness(state, action: PayloadAction<Brightness>) {
+      state.annotationBrightness = action.payload
+    },
   },
 })
 
@@ -135,6 +140,7 @@ export const {
   clearSelection,
   toggleLineAnnotation,
   setShowStraightArrows,
+  setAnnotationBrightness,
 } = actions
 
 const undoableActions: Set<string> = new Set([
@@ -145,6 +151,7 @@ const undoableActions: Set<string> = new Set([
   toggleLineAnnotation.type,
   setMarkerColor.type,
   setArrowColor.type,
+  setAnnotationBrightness.type,
 ])
 
 export function isUndoableAction(action: AnyAction): boolean {
@@ -165,6 +172,7 @@ export function undoableSlice({
   arrows,
   lineAnnotations,
   colors,
+  annotationBrightness,
 }: State) {
-  return { markers, arrows, lineAnnotations, colors }
+  return { markers, arrows, lineAnnotations, colors, annotationBrightness }
 }
