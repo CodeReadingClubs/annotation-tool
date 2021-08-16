@@ -1,6 +1,12 @@
 import React from 'react'
 import { shallowEqual } from 'react-redux'
-import { addMarker, removeArrow, removeMarker } from '../reducer'
+import {
+  addMarker,
+  removeArrow,
+  removeMarker,
+  setArrowColor,
+  setMarkerColor,
+} from '../reducer'
 import { useDispatch, useSelector } from '../store'
 import { Arrow, Marker, Point, Rect } from '../types'
 import ColorPicker from './ColorPicker'
@@ -54,6 +60,7 @@ function TextPopover({ rect }: { rect: Rect }) {
 
 function MarkerPopover({ marker }: { marker: Marker }) {
   const dispatch = useDispatch()
+  const colors = useSelector((state) => state.colors, shallowEqual)
   return (
     <Popover
       autofocus
@@ -64,15 +71,24 @@ function MarkerPopover({ marker }: { marker: Marker }) {
       className='popover--marker'
     >
       <button onClick={() => dispatch(removeMarker(marker))}>remove</button>
+      <ColorPicker
+        colors={colors}
+        onSelect={(color) => dispatch(setMarkerColor({ marker, color }))}
+      />
     </Popover>
   )
 }
 
 function ArrowPopover({ arrow, point }: { arrow: Arrow; point: Point }) {
   const dispatch = useDispatch()
+  const colors = useSelector((state) => state.colors, shallowEqual)
   return (
     <Popover autofocus origin={point} className='popover--arrow'>
       <button onClick={() => dispatch(removeArrow(arrow))}>remove</button>
+      <ColorPicker
+        colors={colors}
+        onSelect={(color) => dispatch(setArrowColor({ arrow, color }))}
+      />
     </Popover>
   )
 }

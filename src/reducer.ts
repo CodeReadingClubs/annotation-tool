@@ -71,6 +71,32 @@ const { reducer, actions } = createSlice({
     addArrow(state, action: PayloadAction<Arrow>) {
       state.arrows.push(action.payload)
     },
+    setMarkerColor(
+      state,
+      action: PayloadAction<{ marker: Marker; color: string }>,
+    ) {
+      const marker = state.markers.find(
+        ({ id }) => id === action.payload.marker.id,
+      )
+      if (!marker) {
+        return
+      }
+      marker.color = action.payload.color
+      state.currentSelection = null
+    },
+    setArrowColor(
+      state,
+      action: PayloadAction<{ arrow: Arrow; color: string }>,
+    ) {
+      const arrow = state.arrows.find(
+        ({ id }) => id === action.payload.arrow.id,
+      )
+      if (!arrow) {
+        return
+      }
+      arrow.color = action.payload.color
+      state.currentSelection = null
+    },
     toggleLineAnnotation(
       state,
       {
@@ -103,6 +129,8 @@ export const {
   addArrow,
   selectArrow,
   removeArrow,
+  setMarkerColor,
+  setArrowColor,
   clearSelection,
   toggleLineAnnotation,
   setShowStraightArrows,
@@ -114,6 +142,8 @@ const undoableActions: Set<string> = new Set([
   addArrow.type,
   removeArrow.type,
   toggleLineAnnotation.type,
+  setMarkerColor.type,
+  setArrowColor.type,
 ])
 
 export function isUndoableAction(action: AnyAction): boolean {
