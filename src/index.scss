@@ -62,6 +62,13 @@ body {
     background: gray;
     clip-path: polygon(0% 100%, 100% 100%, 50% 0%);
   }
+
+  &--arrow,
+  &--marker {
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+  }
 }
 
 .color-button {

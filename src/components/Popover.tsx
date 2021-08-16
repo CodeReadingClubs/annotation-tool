@@ -6,9 +6,15 @@ import { Point } from '../types'
 type Props = PropsWithChildren<{
   origin: Point
   autofocus?: boolean
+  className?: string
 }>
 
-export function Popover({ origin, autofocus = false, children }: Props) {
+export function Popover({
+  origin,
+  autofocus = false,
+  children,
+  className,
+}: Props) {
   const dispatch = useDispatch()
   const ref = React.useRef<HTMLDivElement | null>(null)
   React.useEffect(() => {
@@ -23,7 +29,7 @@ export function Popover({ origin, autofocus = false, children }: Props) {
       onBlur={autofocus ? () => dispatch(clearSelection()) : undefined}
       onMouseDown={autofocus ? (event) => event.preventDefault() : undefined}
       tabIndex={autofocus ? 1 : undefined}
-      className='popover'
+      className={`popover ${className ?? ''}`}
       style={
         {
           '--top': `${Math.round(origin.y)}px`,
