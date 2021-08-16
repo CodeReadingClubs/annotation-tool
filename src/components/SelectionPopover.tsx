@@ -74,6 +74,7 @@ function MarkerPopover({ marker }: { marker: Marker }) {
       <ColorPicker
         colors={colors}
         onSelect={(color) => dispatch(setMarkerColor({ marker, color }))}
+        selectedColor={marker.color}
       />
     </Popover>
   )
@@ -88,6 +89,7 @@ function ArrowPopover({ arrow, point }: { arrow: Arrow; point: Point }) {
       <ColorPicker
         colors={colors}
         onSelect={(color) => dispatch(setArrowColor({ arrow, color }))}
+        selectedColor={arrow.color ?? arrow.fromMarker.color}
       />
     </Popover>
   )

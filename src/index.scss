@@ -80,6 +80,29 @@ body {
   border: 0;
   background: var(--color);
   border-radius: 0.125rem;
+  position: relative;
+
+  &--selected {
+    &:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(
+        circle at center,
+        white 0%,
+        white 25%,
+        rgba(0, 0, 0, 0) 25%
+      );
+    }
+  }
+}
+
+.color-picker {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
 }
 
 .code-container {
