@@ -23,6 +23,7 @@ export type UnfinishedArrow = {
   midPoints: Point[]
   toPoint: Point
   toMarker: Marker | null
+  color?: string
   dependencies: Record<string, boolean>
 }
 
@@ -32,6 +33,7 @@ export type Arrow = {
   midPoints: Point[]
   toPoint: Point
   toMarker: Marker
+  color?: string
   id: string
   dependencies: Record<string, boolean>
 }
