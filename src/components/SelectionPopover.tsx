@@ -83,13 +83,16 @@ function MarkerPopover({ marker }: { marker: Marker }) {
 function ArrowPopover({ arrow, point }: { arrow: Arrow; point: Point }) {
   const dispatch = useDispatch()
   const colors = useSelector((state) => state.colors, shallowEqual)
+  const selectedColor = useSelector(
+    (state) => arrow.color ?? state.markers[arrow.fromMarker].color,
+  )
   return (
     <Popover autofocus origin={point} className='popover--arrow'>
       <button onClick={() => dispatch(removeArrow(arrow))}>remove</button>
       <ColorPicker
         colors={colors}
         onSelect={(color) => dispatch(setArrowColor({ arrow, color }))}
-        selectedColor={arrow.color ?? arrow.fromMarker.color}
+        selectedColor={selectedColor}
       />
     </Popover>
   )

@@ -1,6 +1,7 @@
 import React, { MouseEvent } from 'react'
 import { arrowAngleForPoints, pointArrayForArrow } from '../geometry'
 import useCssColor from '../hooks/useCssColor'
+import { useSelector } from '../store'
 import { Arrow, UnfinishedArrow } from '../types'
 
 type Props = {
@@ -24,7 +25,10 @@ export default function ArrowLine({
   const endPoint = points[points.length - 1]
   const arrowAngle = arrowAngleForPoints(points)
   const pointsString = points.map(({ x, y }) => `${x},${y}`).join(' ')
-  const color = useCssColor(arrow.color ?? arrow.fromMarker.color)
+  const color = useSelector(
+    (state) => arrow.color ?? state.markers[arrow.fromMarker].color,
+  )
+  const cssColor = useCssColor(color)
 
   const hasMouseEvents = onClick !== undefined || onMouseDown !== undefined
   const strokeWidth = highlighted ? 5 : 3
@@ -48,7 +52,7 @@ export default function ArrowLine({
       )}
       <polyline
         points={pointsString}
-        stroke={color}
+        stroke={cssColor}
         fill='none'
         strokeWidth={strokeWidth}
       />
@@ -59,7 +63,7 @@ export default function ArrowLine({
           y1={endPoint.y}
           x2={endPoint.x + 15 * Math.cos(arrowAngle + Math.PI + Math.PI / 8)}
           y2={endPoint.y + 15 * Math.sin(arrowAngle + Math.PI + Math.PI / 8)}
-          stroke={color}
+          stroke={cssColor}
           strokeWidth={strokeWidth}
         />
       )}
@@ -69,7 +73,7 @@ export default function ArrowLine({
           y1={endPoint.y}
           x2={endPoint.x + 15 * Math.cos(arrowAngle + Math.PI - Math.PI / 8)}
           y2={endPoint.y + 15 * Math.sin(arrowAngle + Math.PI - Math.PI / 8)}
-          stroke={color}
+          stroke={cssColor}
           strokeWidth={strokeWidth}
         />
       )}

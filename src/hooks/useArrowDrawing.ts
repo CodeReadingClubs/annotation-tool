@@ -69,7 +69,7 @@ export default function useArrowDrawing(
         event.stopPropagation()
       }
 
-      const markerIsOriginMarker = marker?.id === drag.fromMarker.id
+      const markerIsOriginMarker = marker?.id === drag.fromMarker
 
       const currentPoint = pointFromEvent(event, containerRef.current!)
       const lastPoint =
@@ -97,7 +97,7 @@ export default function useArrowDrawing(
         return
       }
 
-      if (!marker || marker.id === drag.fromMarker.id) {
+      if (!marker || marker.id === drag.fromMarker) {
         setDrag(null)
         return
       }
@@ -143,7 +143,6 @@ function dragStartProperties(
   containerRef: React.MutableRefObject<SVGSVGElement | null>,
 ): Pick<UnfinishedArrow, 'fromPoint' | 'fromMarker' | 'dependencies'> {
   const currentPoint = pointFromEvent(event, containerRef.current!)
-
   if ('fromMarker' in target) {
     return {
       fromPoint: straight
@@ -153,13 +152,13 @@ function dragStartProperties(
       dependencies: {
         ...target.dependencies,
         [target.id]: true,
-        [target.fromMarker.id]: true,
+        [target.fromMarker]: true,
       },
     }
   } else {
     return {
       fromPoint: currentPoint,
-      fromMarker: target,
+      fromMarker: target.id,
       dependencies: { [target.id]: true },
     }
   }

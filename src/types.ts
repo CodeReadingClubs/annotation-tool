@@ -21,7 +21,7 @@ export type Marker = Selection & {
 
 export type UnfinishedArrow = {
   fromPoint: Point
-  fromMarker: Marker
+  fromMarker: string
   midPoints: Point[]
   toPoint: Point
   toMarker: Marker | null
@@ -31,7 +31,7 @@ export type UnfinishedArrow = {
 
 export type Arrow = {
   fromPoint: Point
-  fromMarker: Marker
+  fromMarker: string
   midPoints: Point[]
   toPoint: Point
   toMarker: Marker
