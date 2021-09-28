@@ -38,7 +38,7 @@ export default function Svg() {
           selectable={false}
         />
       )}
-      {arrows.map((arrow) => (
+      {Object.values(arrows).map((arrow) => (
         <ArrowLine
           arrow={arrow}
           straight={showStraightArrows}
@@ -60,7 +60,7 @@ export default function Svg() {
           key={arrow.id}
         />
       ))}
-      {markers.map((marker) => (
+      {Object.values(markers).map((marker) => (
         <MarkerRect
           key={marker.id}
           marker={marker}

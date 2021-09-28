@@ -6,8 +6,8 @@ import { Arrow, Marker, Point, Rect } from './types'
 export type State = {
   code: string | null
   currentSelection: Selection | null
-  markers: Marker[]
-  arrows: Arrow[]
+  markers: Record<string, Marker>
+  arrows: Record<string, Arrow>
   lineAnnotations: Record<number, Record<Color, boolean>>
   colors: Color[]
   annotationBrightness: Brightness
@@ -22,8 +22,8 @@ type Selection =
 const initialState: State = {
   code: null,
   currentSelection: null,
-  markers: [],
-  arrows: [],
+  markers: {},
+  arrows: {},
   lineAnnotations: {},
   colors: colors as unknown as Color[],
   annotationBrightness: 'medium',
@@ -50,37 +50,46 @@ const { reducer, actions } = createSlice({
       state.currentSelection = null
     },
     removeMarker(state, action: PayloadAction<Marker>) {
-      state.markers = state.markers.filter(
-        (marker) => marker.id !== action.payload.id,
-      )
-      state.arrows = removeArrowsWithDependency(state.arrows, action.payload.id)
+      delete state.markers[action.payload.id]
+      // TODO: mutating record while iterating over it
+      for (const arrow of Object.values(state.arrows)) {
+        if (arrow.dependencies[action.payload.id]) {
+          delete state.arrows[arrow.id]
+        }
+      }
       state.currentSelection = null
     },
     removeArrow(state, action: PayloadAction<Arrow>) {
-      state.arrows = removeArrowsWithDependency(state.arrows, action.payload.id)
+      for (const arrow of Object.values(state.arrows)) {
+        if (
+          arrow.dependencies[action.payload.id] ||
+          arrow.id === action.payload.id
+        ) {
+          delete state.arrows[arrow.id]
+        }
+      }
       state.currentSelection = null
     },
     addMarker(state, action: PayloadAction<{ rect: Rect; color: Color }>) {
       if (state.currentSelection?.type === 'text') {
         document.getSelection()?.removeAllRanges()
       }
-      state.markers.push({
+      const id = uuid()
+      state.markers[id] = {
         ...action.payload.rect,
         color: action.payload.color,
-        id: uuid(),
-      })
+        id,
+      }
       state.currentSelection = null
     },
     addArrow(state, action: PayloadAction<Arrow>) {
-      state.arrows.push(action.payload)
+      state.arrows[action.payload.id] = action.payload
     },
     setMarkerColor(
       state,
       action: PayloadAction<{ marker: Marker; color: Color }>,
     ) {
-      const marker = state.markers.find(
-        ({ id }) => id === action.payload.marker.id,
-      )
+      const marker = state.markers[action.payload.marker.id]
       if (!marker) {
         return
       }
@@ -91,9 +100,7 @@ const { reducer, actions } = createSlice({
       state,
       action: PayloadAction<{ arrow: Arrow; color: Color }>,
     ) {
-      const arrow = state.arrows.find(
-        ({ id }) => id === action.payload.arrow.id,
-      )
+      const arrow = state.arrows[action.payload.arrow.id]
       if (!arrow) {
         return
       }
@@ -118,12 +125,6 @@ const { reducer, actions } = createSlice({
     },
   },
 })
-
-function removeArrowsWithDependency(arrows: Arrow[], id: string): Arrow[] {
-  return arrows.filter(
-    (arrow) => !(id in arrow.dependencies) && arrow.id !== id,
-  )
-}
 
 export default reducer
 export const {
@@ -162,8 +163,8 @@ export const emptyAnnotations: Pick<
   State,
   'markers' | 'arrows' | 'lineAnnotations'
 > = {
-  markers: [],
-  arrows: [],
+  markers: {},
+  arrows: {},
   lineAnnotations: {},
 }
 
