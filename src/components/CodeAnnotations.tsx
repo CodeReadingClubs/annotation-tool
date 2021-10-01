@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import { shallowEqual } from 'react-redux'
 import useArrowDrawing from '../hooks/useArrowDrawing'
 import useTextSelectionHandler from '../hooks/useTextSelectionHandler'
 import { selectArrow, selectMarker } from '../reducer'
@@ -7,14 +6,29 @@ import { useDispatch, useSelector } from '../store'
 import { pointFromEvent } from '../util'
 import ArrowLine from './ArrowLine'
 import MarkerRect from './MarkerRect'
+import SelectionPopover from './SelectionPopover'
 
-export default function Svg() {
-  const containerRef = React.useRef<SVGSVGElement | null>(null)
-  const dispatch = useDispatch()
-  const { currentSelection, markers, arrows, showStraightArrows } = useSelector(
-    (state) => state,
-    shallowEqual,
+export default function CodeAnnotations() {
+  const numberOfLines = useSelector(
+    (state) => state.code?.split('\n').length ?? 1,
   )
+
+  return (
+    <div
+      className='svg-container'
+      style={{
+        gridRow: `1 / span ${numberOfLines}`,
+      }}
+    >
+      <Svg />
+      <SelectionPopover />
+    </div>
+  )
+}
+
+function Svg() {
+  const containerRef = React.useRef<SVGSVGElement | null>(null)
+  const showStraightArrows = useSelector((state) => state.showStraightArrows)
   const { drag, mouseEvents } = useArrowDrawing(containerRef)
 
   const selectionChangeHandler = useTextSelectionHandler(containerRef)

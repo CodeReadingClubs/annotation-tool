@@ -1,39 +1,46 @@
 import React, { Fragment } from 'react'
-import { shallowEqual } from 'react-redux'
 import { Color } from '../colors'
 import useCssColor from '../hooks/useCssColor'
 import { toggleLineAnnotation } from '../reducer'
 import { useDispatch, useSelector } from '../store'
+import CodeAnnotations from './CodeAnnotations'
 
 export default function Code() {
-  const dispatch = useDispatch()
-  const { code, annotations } = useSelector(
-    (state) => ({
-      code: state.code,
-      annotations: state.lineAnnotations,
-    }),
-    shallowEqual,
-  )
-  if (!code) {
+  const lines = useSelector((state) => state.code?.split('\n'))
+  if (!lines) {
     return <div>Loading code...</div>
   }
-  const lines = code.split('\n')
 
   return (
     <div className='code-container'>
       {lines.map((line, index) => (
-        <Fragment key={index}>
-          <Annotations
-            annotations={annotations[index + 1] ?? {}}
-            toggleAnnotation={(color) =>
-              dispatch(toggleLineAnnotation({ lineNumber: index + 1, color }))
-            }
-          />
-          <span className='line-number'>{index + 1}</span>
-          <pre className='code-line'>{line}</pre>
-        </Fragment>
+        <Line key={index} lineNumber={index + 1} line={line} />
       ))}
+      <CodeAnnotations />
     </div>
+  )
+}
+
+function Line({ lineNumber, line }: { lineNumber: number; line: string }) {
+  const dispatch = useDispatch()
+  const annotations = useSelector(
+    (state) => state.lineAnnotations[lineNumber] ?? {},
+  )
+  return (
+    <Fragment key={lineNumber}>
+      <Annotations
+        annotations={annotations}
+        toggleAnnotation={(color) =>
+          dispatch(toggleLineAnnotation({ lineNumber, color }))
+        }
+      />
+      <span className='line-number' style={{ gridRow: lineNumber }}>
+        {lineNumber}
+      </span>
+      <pre className='code-line' style={{ gridRow: lineNumber }}>
+        {line}
+      </pre>
+    </Fragment>
   )
 }
 

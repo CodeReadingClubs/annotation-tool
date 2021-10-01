@@ -3,8 +3,6 @@ import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import Code from '../components/Code'
 import Controls from '../components/Controls'
-import SelectionPopover from '../components/SelectionPopover'
-import Svg from '../components/Svg'
 import * as github from '../github'
 import { useFile, useFilePath } from '../hooks/useFile'
 import useKeyboardHandler from '../hooks/useKeyboardHandler'
@@ -75,8 +73,6 @@ function LoadedPage() {
       <Controls />
       <div className='container'>
         <Code />
-        <Svg />
-        <SelectionPopover />
       </div>
     </div>
   )

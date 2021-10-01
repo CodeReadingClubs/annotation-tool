@@ -24,16 +24,21 @@ body {
 }
 
 .container {
-  position: relative;
   margin-top: 2rem;
 
-  svg {
-    position: absolute;
-    top: 0;
-    left: 0;
+  .svg-container {
+    grid-column: 3;
+    pointer-events: none;
     width: 100%;
     height: 100%;
-    mix-blend-mode: multiply;
+    position: relative;
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      mix-blend-mode: multiply;
+    }
   }
 }
 
@@ -42,6 +47,7 @@ body {
   --left: auto;
   --transform: none;
 
+  pointer-events: auto;
   position: absolute;
   outline: none;
   top: var(--top);
@@ -115,6 +121,7 @@ body {
 }
 
 .line-number {
+  grid-column: 2;
   color: gray;
   text-align: right;
   margin-right: 0.5rem;
@@ -125,6 +132,7 @@ body {
 }
 
 .line-annotations {
+  grid-column: 1;
   display: flex;
   flex-direction: row;
 
@@ -152,6 +160,7 @@ body {
 }
 
 pre {
+  grid-column: 3;
   margin: 0;
   font-size: 1rem;
 }
