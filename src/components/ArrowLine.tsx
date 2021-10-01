@@ -21,7 +21,16 @@ export default function ArrowLine({
   onClick,
   onMouseDown,
 }: Props) {
-  const points = pointArrayForArrow(arrow, straight)
+  const toMarker = useSelector((state) =>
+    arrow.toMarker ? state.markers[arrow.toMarker] : null,
+  )
+  const points = pointArrayForArrow(
+    arrow.fromPoint,
+    arrow.midPoints,
+    arrow.toPoint,
+    toMarker,
+    straight,
+  )
   const endPoint = points[points.length - 1]
   const arrowAngle = arrowAngleForPoints(points)
   const pointsString = points.map(({ x, y }) => `${x},${y}`).join(' ')

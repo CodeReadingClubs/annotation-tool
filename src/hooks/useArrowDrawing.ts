@@ -85,7 +85,7 @@ export default function useArrowDrawing(
         ...drag,
         midPoints: newMidPoints,
         toPoint: currentPoint,
-        toMarker: markerIsOriginMarker ? null : marker ?? null,
+        toMarker: markerIsOriginMarker ? null : marker?.id ?? null,
       })
     },
     [containerRef, drag, showStraightArrows],
@@ -106,7 +106,7 @@ export default function useArrowDrawing(
         fromMarker: drag.fromMarker,
         fromPoint: drag.fromPoint,
         midPoints: drag.midPoints,
-        toMarker: marker,
+        toMarker: marker.id,
         toPoint: pointFromEvent(event, containerRef.current!),
         id: uuid(),
         dependencies: { ...drag.dependencies, [marker.id]: true },

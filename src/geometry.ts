@@ -1,4 +1,4 @@
-import { Arrow, Point, Rect, UnfinishedArrow } from './types'
+import { Marker, Point, Rect } from './types'
 import { findLast, isMonotonous, minBy } from './util'
 
 export function distanceBetweenPoints(a: Point, b: Point): number {
@@ -6,15 +6,17 @@ export function distanceBetweenPoints(a: Point, b: Point): number {
 }
 
 export function pointArrayForArrow(
-  arrow: Arrow | UnfinishedArrow,
+  fromPoint: Point,
+  midPoints: Point[],
+  toPoint: Point,
+  toMarker: Marker | null,
   straight: boolean,
 ): Point[] {
   const allPoints = straight
-    ? [arrow.fromPoint, arrow.toPoint]
-    : [arrow.fromPoint, ...arrow.midPoints, arrow.toPoint]
+    ? [fromPoint, toPoint]
+    : [fromPoint, ...midPoints, toPoint]
 
-  const marker = arrow.toMarker
-  if (!marker || allPoints.every((pt) => !isPointInRect(pt, marker))) {
+  if (!toMarker || allPoints.every((pt) => !isPointInRect(pt, toMarker))) {
     return allPoints
   }
 
@@ -22,7 +24,7 @@ export function pointArrayForArrow(
     allPoints,
     (_, index) =>
       index > 0 &&
-      lineRectIntersection(allPoints[index - 1], allPoints[index], marker) !==
+      lineRectIntersection(allPoints[index - 1], allPoints[index], toMarker) !==
         null,
   )?.[1]
 
@@ -33,7 +35,7 @@ export function pointArrayForArrow(
   const intersection = lineRectIntersection(
     allPoints[lastIndex],
     allPoints[lastIndex - 1],
-    marker,
+    toMarker,
   )!
   return [...allPoints.slice(0, lastIndex), intersection]
 }

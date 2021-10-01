@@ -24,7 +24,7 @@ export type UnfinishedArrow = {
   fromMarker: string
   midPoints: Point[]
   toPoint: Point
-  toMarker: Marker | null
+  toMarker: string | null
   color?: Color
   dependencies: Record<string, boolean>
 }
@@ -34,7 +34,7 @@ export type Arrow = {
   fromMarker: string
   midPoints: Point[]
   toPoint: Point
-  toMarker: Marker
+  toMarker: string
   color?: Color
   id: string
   dependencies: Record<string, boolean>
