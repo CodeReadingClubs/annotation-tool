@@ -38,7 +38,29 @@ export default function Svg() {
           selectable={false}
         />
       )}
-      {Object.values(arrows).map((arrow) => (
+      <Arrows
+        containerRef={containerRef}
+        arrowMouseEvents={mouseEvents.arrow}
+      />
+      <Markers markerMouseEvents={mouseEvents.marker} />
+    </svg>
+  )
+}
+
+type ArrowsProps = {
+  containerRef: React.MutableRefObject<SVGSVGElement | null>
+  arrowMouseEvents: ReturnType<typeof useArrowDrawing>['mouseEvents']['arrow']
+}
+
+function Arrows({ containerRef, arrowMouseEvents }: ArrowsProps) {
+  const dispatch = useDispatch()
+  const arrows = useSelector((state) => Object.values(state.arrows))
+  const showStraightArrows = useSelector((state) => state.showStraightArrows)
+  const currentSelection = useSelector((state) => state.currentSelection)
+
+  return (
+    <>
+      {arrows.map((arrow) => (
         <ArrowLine
           arrow={arrow}
           straight={showStraightArrows}
@@ -51,7 +73,7 @@ export default function Svg() {
               }),
             )
           }
-          onMouseDown={(e) => mouseEvents.arrow.onMouseDown(e, arrow)}
+          onMouseDown={(e) => arrowMouseEvents.onMouseDown(e, arrow)}
           highlighted={
             currentSelection?.type === 'arrow' &&
             (arrow.id === currentSelection.arrow.id ||
@@ -60,17 +82,32 @@ export default function Svg() {
           key={arrow.id}
         />
       ))}
-      {Object.values(markers).map((marker) => (
+    </>
+  )
+}
+
+type MarkersProps = {
+  markerMouseEvents: ReturnType<typeof useArrowDrawing>['mouseEvents']['marker']
+}
+
+function Markers({ markerMouseEvents }: MarkersProps) {
+  const dispatch = useDispatch()
+  const markers = useSelector((state) => Object.values(state.markers))
+  const currentSelection = useSelector((state) => state.currentSelection)
+
+  return (
+    <>
+      {markers.map((marker) => (
         <MarkerRect
           key={marker.id}
           marker={marker}
           selectable={currentSelection?.type !== 'text'}
           onClick={() => dispatch(selectMarker(marker))}
-          onMouseDown={(e) => mouseEvents.marker.onMouseDown(e, marker)}
-          onMouseMove={(e) => mouseEvents.marker.onMouseMove(e, marker)}
-          onMouseUp={(e) => mouseEvents.marker.onMouseUp(e, marker)}
+          onMouseDown={(e) => markerMouseEvents.onMouseDown(e, marker)}
+          onMouseMove={(e) => markerMouseEvents.onMouseMove(e, marker)}
+          onMouseUp={(e) => markerMouseEvents.onMouseUp(e, marker)}
         />
       ))}
-    </svg>
+    </>
   )
 }
