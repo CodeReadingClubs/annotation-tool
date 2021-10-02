@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import useArrowDrawing from '../hooks/useArrowDrawing'
 import useTextSelectionHandler from '../hooks/useTextSelectionHandler'
 import { selectArrow, selectMarker } from '../reducer'
+import { useSettings } from '../hooks/useSettings'
 import { useDispatch, useSelector } from '../store'
 import { pointFromEvent } from '../util'
 import ArrowLine from './ArrowLine'
@@ -28,7 +29,7 @@ export default function CodeAnnotations() {
 
 function Svg() {
   const containerRef = React.useRef<SVGSVGElement | null>(null)
-  const showStraightArrows = useSelector((state) => state.showStraightArrows)
+  const { showStraightArrows } = useSettings()
   const { drag, mouseEvents } = useArrowDrawing(containerRef)
 
   const selectionChangeHandler = useTextSelectionHandler(containerRef)
@@ -69,7 +70,7 @@ type ArrowsProps = {
 function Arrows({ containerRef, arrowMouseEvents }: ArrowsProps) {
   const dispatch = useDispatch()
   const arrows = useSelector((state) => Object.values(state.arrows))
-  const showStraightArrows = useSelector((state) => state.showStraightArrows)
+  const { showStraightArrows } = useSettings()
   const currentSelection = useSelector((state) => state.currentSelection)
 
   return (

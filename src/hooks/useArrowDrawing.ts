@@ -2,7 +2,8 @@ import React, { MouseEvent, useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
 import { distanceBetweenPoints, pointOnLineNearLine } from '../geometry'
 import { addArrow } from '../reducer'
-import { useDispatch, useSelector } from '../store'
+import { useSettings } from './useSettings'
+import { useDispatch } from '../store'
 import { Arrow, Marker, UnfinishedArrow } from '../types'
 import { pointFromEvent } from '../util'
 
@@ -34,7 +35,7 @@ export default function useArrowDrawing(
   containerRef: React.MutableRefObject<SVGSVGElement | null>,
 ): ReturnType {
   const [drag, setDrag] = React.useState<UnfinishedArrow | null>(null)
-  const showStraightArrows = useSelector((state) => state.showStraightArrows)
+  const { showStraightArrows } = useSettings()
   const dispatch = useDispatch()
 
   const onMouseDown = useCallback(
