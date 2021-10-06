@@ -25,19 +25,10 @@ export type Color = ArrayElement<typeof colors>
 export type Brightness = 'light' | 'medium' | 'dark'
 
 export function cssColorFromColor(
-  color: Color | 'lightblue' | 'lightgreen' | 'gold',
+  color: Color,
   brightness: Brightness,
 ): string {
   switch (color) {
-    case 'lightblue': {
-      return cssColorFromColor('lightBlue', brightness)
-    }
-    case 'lightgreen': {
-      return cssColorFromColor('lightGreen', brightness)
-    }
-    case 'gold': {
-      return cssColorFromColor('orange', brightness)
-    }
     case 'pink':
     case 'purple':
     case 'deepPurple':
