@@ -5,18 +5,15 @@ import { toggleLineAnnotation } from '../reducer'
 import { useDispatch, useSelector } from '../store'
 import CodeAnnotations from './CodeAnnotations'
 
-export default function Code() {
-  const lines = useSelector((state) => state.code?.split('\n'))
-  if (!lines) {
-    return <div>Loading code...</div>
-  }
+export default function Code({ code }: { code: string }) {
+  const lines = code.split('\n')
 
   return (
     <div className='code-container'>
       {lines.map((line, index) => (
         <Line key={index} lineNumber={index + 1} line={line} />
       ))}
-      <CodeAnnotations />
+      <CodeAnnotations numberOfLines={lines.length} />
     </div>
   )
 }

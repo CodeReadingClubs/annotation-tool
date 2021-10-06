@@ -28,7 +28,7 @@ export default function createStore(source: Source) {
   const persistConfig = {
     key: `state:${localStorageKey(source)}`,
     storage,
-    whitelist: ['code', 'markers', 'arrows', 'lineAnnotations'],
+    whitelist: ['markers', 'arrows', 'lineAnnotations'],
   }
   const undoablePersistedReducer = persistReducer(
     persistConfig,

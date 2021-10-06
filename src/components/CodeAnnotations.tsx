@@ -9,11 +9,11 @@ import ArrowLine from './ArrowLine'
 import MarkerRect from './MarkerRect'
 import SelectionPopover from './SelectionPopover'
 
-export default function CodeAnnotations() {
-  const numberOfLines = useSelector(
-    (state) => state.code?.split('\n').length ?? 1,
-  )
-
+export default function CodeAnnotations({
+  numberOfLines,
+}: {
+  numberOfLines: number
+}) {
   return (
     <div
       className='svg-container'

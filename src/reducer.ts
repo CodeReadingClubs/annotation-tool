@@ -4,7 +4,6 @@ import { Color, colors } from './colors'
 import { Arrow, Marker, Point, Rect } from './types'
 
 export type State = {
-  code: string | null
   currentSelection: Selection | null
   markers: Record<string, Marker>
   arrows: Record<string, Arrow>
@@ -18,7 +17,6 @@ type Selection =
   | { type: 'arrow'; arrow: Arrow; point: Point }
 
 const initialState: State = {
-  code: null,
   currentSelection: null,
   markers: {},
   arrows: {},
@@ -30,9 +28,6 @@ const { reducer, actions } = createSlice({
   name: 'state',
   initialState,
   reducers: {
-    setCode(state, action: PayloadAction<string>) {
-      state.code = action.payload
-    },
     selectText(state, action: PayloadAction<Rect>) {
       state.currentSelection = { type: 'text', rect: action.payload }
     },
@@ -118,7 +113,6 @@ const { reducer, actions } = createSlice({
 
 export default reducer
 export const {
-  setCode,
   selectText,
   addMarker,
   selectMarker,

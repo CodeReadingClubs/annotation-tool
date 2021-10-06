@@ -1,55 +1,38 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import Code from '../components/Code'
 import Controls from '../components/Controls'
-import * as github from '../github'
+import useCode from '../hooks/useCode'
 import useKeyboardHandler from '../hooks/useKeyboardHandler'
 import useSource from '../hooks/useSource'
-import { setCode } from '../reducer'
-import createStore, { useDispatch, useSelector } from '../store'
+import createStore from '../store'
 
-export default function AnnotationPageWrapper() {
+export default function AnnotationPage() {
   const source = useSource()
   const { store, persistor } = createStore(source)
 
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-        <AnnotationPage />
+        <AnnotationPageContent />
       </PersistGate>
     </Provider>
   )
 }
 
-function AnnotationPage() {
-  const code = useSelector((state) => state.code)
+function AnnotationPageContent() {
+  const source = useSource()
+  const { code, error } = useCode(source)
 
   if (code) {
-    return <LoadedPage />
+    return <LoadedPage code={code} />
   } else {
-    return <LoadingPage />
+    return <LoadingPage error={error} />
   }
 }
 
-function LoadingPage() {
-  const source = useSource()
-  const dispatch = useDispatch()
-  const [error, setError] = useState<Error | null>(null)
-
-  useEffect(() => {
-    if (!source) {
-      setError(new Error(`Can't parse file path`))
-      return
-    }
-    github
-      .fetchCode(source.file)
-      .then((code) => {
-        dispatch(setCode(code))
-      })
-      .catch((error) => setError(error))
-  }, [source])
-
+function LoadingPage({ error }: { error: Error | null }) {
   if (error) {
     return (
       <div>Oh no! Something went wrong while trying to fetch the code.</div>
@@ -59,7 +42,7 @@ function LoadingPage() {
   }
 }
 
-function LoadedPage() {
+function LoadedPage({ code }: { code: string }) {
   const handler = useKeyboardHandler()
   useEffect(() => {
     document.onkeydown = handler
@@ -69,7 +52,7 @@ function LoadedPage() {
     <div>
       <Controls />
       <div className='container'>
-        <Code />
+        <Code code={code} />
       </div>
     </div>
   )
