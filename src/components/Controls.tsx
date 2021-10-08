@@ -1,7 +1,8 @@
 import React, { useCallback } from 'react'
 import { Brightness } from '../colors'
-import { useFilePath } from '../hooks/useFile'
 import { useSettings } from '../hooks/useSettings'
+import useSource from '../hooks/useSource'
+import { localStorageKey } from '../source'
 import { useDispatch } from '../store'
 import { redo, reset, undo, useCanUndoRedo } from '../undoable'
 import Export from './Export'
@@ -84,9 +85,9 @@ function UndoManagement() {
 }
 
 function PersistedStateDebugging() {
-  const filePath = useFilePath()
+  const source = useSource()
   const paste = useCallback(() => {
-    const key = `persist:state:${filePath}`
+    const key = `persist:state:${localStorageKey(source)}`
     navigator.clipboard
       .readText()
       .then((text) => localStorage.setItem(key, text))
@@ -94,7 +95,7 @@ function PersistedStateDebugging() {
   }, [])
 
   const copy = useCallback(() => {
-    const key = `persist:state:${filePath}`
+    const key = `persist:state:${localStorageKey(source)}`
     const localStorageValue = localStorage.getItem(key)
     if (!localStorageValue) {
       console.error(`Value missing in local storage`)

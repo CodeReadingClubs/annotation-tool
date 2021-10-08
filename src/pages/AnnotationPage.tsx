@@ -4,17 +4,14 @@ import { PersistGate } from 'redux-persist/integration/react'
 import Code from '../components/Code'
 import Controls from '../components/Controls'
 import * as github from '../github'
-import { useFile, useFilePath } from '../hooks/useFile'
 import useKeyboardHandler from '../hooks/useKeyboardHandler'
+import useSource from '../hooks/useSource'
 import { setCode } from '../reducer'
 import createStore, { useDispatch, useSelector } from '../store'
 
 export default function AnnotationPageWrapper() {
-  const filePath = useFilePath()
-  if (!filePath) {
-    return <div>Something's wrong with the url.</div>
-  }
-  const { store, persistor } = createStore(filePath)
+  const source = useSource()
+  const { store, persistor } = createStore(source)
 
   return (
     <Provider store={store}>
@@ -36,22 +33,22 @@ function AnnotationPage() {
 }
 
 function LoadingPage() {
-  const file = useFile()
+  const source = useSource()
   const dispatch = useDispatch()
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    if (!file) {
+    if (!source) {
       setError(new Error(`Can't parse file path`))
       return
     }
     github
-      .fetchCode(file)
+      .fetchCode(source.file)
       .then((code) => {
         dispatch(setCode(code))
       })
       .catch((error) => setError(error))
-  }, [file])
+  }, [source])
 
   if (error) {
     return (

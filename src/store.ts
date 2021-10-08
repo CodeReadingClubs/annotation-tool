@@ -12,6 +12,7 @@ import reducer, {
   State,
   undoableSlice,
 } from './reducer'
+import { localStorageKey, Source } from './source'
 import undoable from './undoable'
 
 const undoableReducer = undoable(
@@ -23,9 +24,9 @@ const undoableReducer = undoable(
 
 const middleware = getDefaultMiddleware({ serializableCheck: false })
 
-export default function createStore(filePath: string) {
+export default function createStore(source: Source) {
   const persistConfig = {
-    key: `state:${filePath}`,
+    key: `state:${localStorageKey(source)}`,
     storage,
     whitelist: ['code', 'markers', 'arrows', 'lineAnnotations'],
   }
