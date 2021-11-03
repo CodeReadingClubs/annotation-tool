@@ -11,12 +11,18 @@ export type Rect = {
   height: number
 }
 
-export type Selection = Rect & {
-  id: string
+export type TextRange = {
+  lineNumber: number
+  startOffset: number
+  endOffset: number
+  text: string
 }
 
-export type Marker = Selection & {
+export type TextSelection = Rect & TextRange
+
+export type Marker = TextSelection & {
   color: Color
+  id: string
 }
 
 export type UnfinishedArrow = {

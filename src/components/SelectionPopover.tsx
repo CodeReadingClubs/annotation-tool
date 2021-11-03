@@ -8,7 +8,7 @@ import {
   setMarkerColor,
 } from '../reducer'
 import { useDispatch, useSelector } from '../store'
-import { Arrow, Marker, Point, Rect } from '../types'
+import { Arrow, Marker, Point, TextSelection } from '../types'
 import ColorPicker from './ColorPicker'
 import { Popover } from './Popover'
 
@@ -24,7 +24,7 @@ export default function SelectionPopover() {
 
   switch (currentSelection.type) {
     case 'text': {
-      return <TextPopover rect={currentSelection.rect} />
+      return <TextPopover textSelection={currentSelection.textSelection} />
     }
     case 'marker': {
       return <MarkerPopover marker={currentSelection.marker} />
@@ -40,19 +40,19 @@ export default function SelectionPopover() {
   }
 }
 
-function TextPopover({ rect }: { rect: Rect }) {
+function TextPopover({ textSelection }: { textSelection: TextSelection }) {
   const dispatch = useDispatch()
   const colors = useSelector((state) => state.colors, shallowEqual)
   return (
     <Popover
       origin={{
-        x: rect.left + rect.width / 2,
-        y: rect.bottom,
+        x: textSelection.left + textSelection.width / 2,
+        y: textSelection.bottom,
       }}
     >
       <ColorPicker
         colors={colors}
-        onSelect={(color) => dispatch(addMarker({ rect, color }))}
+        onSelect={(color) => dispatch(addMarker({ textSelection, color }))}
       />
     </Popover>
   )

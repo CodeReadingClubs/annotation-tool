@@ -1,7 +1,7 @@
 import { AnyAction, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { v4 as uuid } from 'uuid'
 import { Color, colors } from './colors'
-import { Arrow, Marker, Point, Rect } from './types'
+import { Arrow, Marker, Point, TextSelection } from './types'
 
 export type State = {
   currentSelection: Selection | null
@@ -12,7 +12,7 @@ export type State = {
 }
 
 type Selection =
-  | { type: 'text'; rect: Rect }
+  | { type: 'text'; textSelection: TextSelection }
   | { type: 'marker'; marker: Marker }
   | { type: 'arrow'; arrow: Arrow; point: Point }
 
@@ -28,8 +28,8 @@ const { reducer, actions } = createSlice({
   name: 'state',
   initialState,
   reducers: {
-    selectText(state, action: PayloadAction<Rect>) {
-      state.currentSelection = { type: 'text', rect: action.payload }
+    selectText(state, action: PayloadAction<TextSelection>) {
+      state.currentSelection = { type: 'text', textSelection: action.payload }
     },
     selectMarker(state, action: PayloadAction<Marker>) {
       state.currentSelection = { type: 'marker', marker: action.payload }
@@ -61,13 +61,16 @@ const { reducer, actions } = createSlice({
       }
       state.currentSelection = null
     },
-    addMarker(state, action: PayloadAction<{ rect: Rect; color: Color }>) {
+    addMarker(
+      state,
+      action: PayloadAction<{ textSelection: TextSelection; color: Color }>,
+    ) {
       if (state.currentSelection?.type === 'text') {
         document.getSelection()?.removeAllRanges()
       }
       const id = uuid()
       state.markers[id] = {
-        ...action.payload.rect,
+        ...action.payload.textSelection,
         color: action.payload.color,
         id,
       }

@@ -34,7 +34,11 @@ function Line({ lineNumber, line }: { lineNumber: number; line: string }) {
       <span className='line-number' style={{ gridRow: lineNumber }}>
         {lineNumber}
       </span>
-      <pre className='code-line' style={{ gridRow: lineNumber }}>
+      <pre
+        className='code-line'
+        style={{ gridRow: lineNumber }}
+        data-line-number={lineNumber}
+      >
         {line}
       </pre>
     </Fragment>
