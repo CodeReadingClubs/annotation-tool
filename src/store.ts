@@ -27,6 +27,7 @@ const middleware = getDefaultMiddleware({ serializableCheck: false })
 export default function createStore(source: Source) {
   const persistConfig = {
     key: `state:${localStorageKey(source)}`,
+    version: 0,
     storage,
     whitelist: ['markers', 'arrows', 'lineAnnotations'],
   }
