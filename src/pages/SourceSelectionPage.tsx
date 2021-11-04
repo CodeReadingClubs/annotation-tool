@@ -1,6 +1,7 @@
 import React, { ChangeEvent, FormEvent, useCallback, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import * as github from '../github'
+import { Source, sourceHash } from '../source'
 
 export default function SourceSelectionPage() {
   return (
@@ -35,7 +36,8 @@ function Form() {
       if (!file) {
         return
       }
-      history.push(`/file/${github.fileHash(file)}`)
+      const source: Source = { type: 'githubPermalink', file }
+      history.push(`/file/${sourceHash(source)}`)
     },
     [url],
   )

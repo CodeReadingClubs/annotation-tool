@@ -1,14 +1,15 @@
 import React, { useCallback } from 'react'
 import { Brightness } from '../colors'
-import { useFilePath } from '../hooks/useFile'
-import { setAnnotationBrightness, setShowStraightArrows } from '../reducer'
-import { useDispatch, useSelector } from '../store'
+import { useSettings } from '../hooks/useSettings'
+import useSource from '../hooks/useSource'
+import { localStorageKey } from '../source'
+import { useDispatch } from '../store'
 import { redo, reset, undo, useCanUndoRedo } from '../undoable'
 import Export from './Export'
 
 export default function Controls() {
   const dispatch = useDispatch()
-  const showStraightArrows = useSelector((state) => state.showStraightArrows)
+  const { showStraightArrows, setShowStraightArrows } = useSettings()
 
   return (
     <div className='annotation-controls'>
@@ -16,7 +17,7 @@ export default function Controls() {
         type='checkbox'
         id='straight-arrows'
         checked={showStraightArrows}
-        onChange={(e) => dispatch(setShowStraightArrows(e.target.checked))}
+        onChange={(e) => setShowStraightArrows(e.target.checked)}
       />
       <label htmlFor='straight-arrows'>Use straight arrows</label>
       <UndoManagement />
@@ -28,8 +29,8 @@ export default function Controls() {
 }
 
 function AnnotationBrightness() {
-  const dispatch = useDispatch()
-  const brightness = useSelector((state) => state.annotationBrightness)
+  const { annotationBrightness: brightness, setAnnotationBrightness } =
+    useSettings()
 
   function RadioItem({ value, title }: { value: Brightness; title: string }) {
     const id = `annotation-brightness--${value}`
@@ -42,7 +43,7 @@ function AnnotationBrightness() {
           value={value}
           checked={brightness === value}
           onChange={(event) =>
-            dispatch(setAnnotationBrightness(event.target.value as Brightness))
+            setAnnotationBrightness(event.target.value as Brightness)
           }
         />
         <label htmlFor={id}>{title}</label>
@@ -84,9 +85,9 @@ function UndoManagement() {
 }
 
 function PersistedStateDebugging() {
-  const filePath = useFilePath()
+  const source = useSource()
   const paste = useCallback(() => {
-    const key = `persist:state:${filePath}`
+    const key = `persist:state:${localStorageKey(source)}`
     navigator.clipboard
       .readText()
       .then((text) => localStorage.setItem(key, text))
@@ -94,7 +95,7 @@ function PersistedStateDebugging() {
   }, [])
 
   const copy = useCallback(() => {
-    const key = `persist:state:${filePath}`
+    const key = `persist:state:${localStorageKey(source)}`
     const localStorageValue = localStorage.getItem(key)
     if (!localStorageValue) {
       console.error(`Value missing in local storage`)

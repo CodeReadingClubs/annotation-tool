@@ -1,6 +1,7 @@
 import React from 'react'
 import { clearSelection, selectText } from '../reducer'
 import { useDispatch, useSelector } from '../store'
+import { TextRange } from '../types'
 
 export default function useTextSelectionHandler(
   containerRef: React.MutableRefObject<SVGSVGElement | null>,
@@ -27,6 +28,7 @@ export default function useTextSelectionHandler(
       }
     } else {
       const rect = selectionRect(selection)
+      const textRange = selectionTextRange(selection)
       const parentRect = containerRef.current.getBoundingClientRect()
       const rectInContainerCoordinates = {
         top: rect.top - parentRect.top,
@@ -35,6 +37,7 @@ export default function useTextSelectionHandler(
         height: rect.height,
         bottom: rect.bottom - parentRect.top,
         right: rect.right - parentRect.left,
+        ...textRange,
       }
       dispatch(selectText(rectInContainerCoordinates))
     }
@@ -63,5 +66,28 @@ function selectionRect(selection: Selection): DOMRect {
     default: {
       throw new Error(`Can't handle a selection that has ${rects.length} rects`)
     }
+  }
+}
+
+function selectionTextRange(selection: Selection): TextRange {
+  const selectionString = selection.toString().replace('\n', '')
+  const range = selection.getRangeAt(0)
+  const lineNumber = parseInt(
+    selection.anchorNode?.parentElement?.dataset.lineNumber ?? '',
+  )
+  if (isNaN(lineNumber)) {
+    throw new Error(
+      `Can't parse the line number of the current text selection ('${selection.toString()}')`,
+    )
+  }
+  const endOffset =
+    range.endOffset === 0
+      ? range.startOffset + selectionString.length
+      : range.endOffset
+  return {
+    text: selectionString,
+    lineNumber,
+    startOffset: range.startOffset,
+    endOffset,
   }
 }

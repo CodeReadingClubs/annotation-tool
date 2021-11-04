@@ -1,5 +1,3 @@
-import LZString from 'lz-string'
-
 export type File = {
   owner: string
   repo: string
@@ -46,14 +44,6 @@ export async function fetchCode({
   return await codeResponse.text()
 }
 
-function pathForFile(file: File): string {
+export function pathForFile(file: File): string {
   return `${file.owner}/${file.repo}/blob/${file.commitSha}/${file.path}`
-}
-
-export function fileHash(file: File): string {
-  return LZString.compressToEncodedURIComponent(pathForFile(file))
-}
-
-export function parseFileHash(hash: string): string | null {
-  return LZString.decompressFromEncodedURIComponent(hash)
 }

@@ -2,7 +2,8 @@ import React, { MouseEvent, useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
 import { distanceBetweenPoints, pointOnLineNearLine } from '../geometry'
 import { addArrow } from '../reducer'
-import { useDispatch, useSelector } from '../store'
+import { useSettings } from './useSettings'
+import { useDispatch } from '../store'
 import { Arrow, Marker, UnfinishedArrow } from '../types'
 import { pointFromEvent } from '../util'
 
@@ -34,7 +35,7 @@ export default function useArrowDrawing(
   containerRef: React.MutableRefObject<SVGSVGElement | null>,
 ): ReturnType {
   const [drag, setDrag] = React.useState<UnfinishedArrow | null>(null)
-  const showStraightArrows = useSelector((state) => state.showStraightArrows)
+  const { showStraightArrows } = useSettings()
   const dispatch = useDispatch()
 
   const onMouseDown = useCallback(
@@ -69,7 +70,7 @@ export default function useArrowDrawing(
         event.stopPropagation()
       }
 
-      const markerIsOriginMarker = marker?.id === drag.fromMarker.id
+      const markerIsOriginMarker = marker?.id === drag.fromMarker
 
       const currentPoint = pointFromEvent(event, containerRef.current!)
       const lastPoint =
@@ -85,7 +86,7 @@ export default function useArrowDrawing(
         ...drag,
         midPoints: newMidPoints,
         toPoint: currentPoint,
-        toMarker: markerIsOriginMarker ? null : marker ?? null,
+        toMarker: markerIsOriginMarker ? null : marker?.id ?? null,
       })
     },
     [containerRef, drag, showStraightArrows],
@@ -97,7 +98,7 @@ export default function useArrowDrawing(
         return
       }
 
-      if (!marker || marker.id === drag.fromMarker.id) {
+      if (!marker || marker.id === drag.fromMarker) {
         setDrag(null)
         return
       }
@@ -106,7 +107,7 @@ export default function useArrowDrawing(
         fromMarker: drag.fromMarker,
         fromPoint: drag.fromPoint,
         midPoints: drag.midPoints,
-        toMarker: marker,
+        toMarker: marker.id,
         toPoint: pointFromEvent(event, containerRef.current!),
         id: uuid(),
         dependencies: { ...drag.dependencies, [marker.id]: true },
@@ -143,7 +144,6 @@ function dragStartProperties(
   containerRef: React.MutableRefObject<SVGSVGElement | null>,
 ): Pick<UnfinishedArrow, 'fromPoint' | 'fromMarker' | 'dependencies'> {
   const currentPoint = pointFromEvent(event, containerRef.current!)
-
   if ('fromMarker' in target) {
     return {
       fromPoint: straight
@@ -153,13 +153,13 @@ function dragStartProperties(
       dependencies: {
         ...target.dependencies,
         [target.id]: true,
-        [target.fromMarker.id]: true,
+        [target.fromMarker]: true,
       },
     }
   } else {
     return {
       fromPoint: currentPoint,
-      fromMarker: target,
+      fromMarker: target.id,
       dependencies: { [target.id]: true },
     }
   }

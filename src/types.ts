@@ -11,30 +11,36 @@ export type Rect = {
   height: number
 }
 
-export type Selection = Rect & {
-  id: string
+export type TextRange = {
+  lineNumber: number
+  startOffset: number
+  endOffset: number
+  text: string
 }
 
-export type Marker = Selection & {
+export type TextSelection = Rect & TextRange
+
+export type Marker = TextSelection & {
   color: Color
+  id: string
 }
 
 export type UnfinishedArrow = {
   fromPoint: Point
-  fromMarker: Marker
+  fromMarker: string
   midPoints: Point[]
   toPoint: Point
-  toMarker: Marker | null
+  toMarker: string | null
   color?: Color
   dependencies: Record<string, boolean>
 }
 
 export type Arrow = {
   fromPoint: Point
-  fromMarker: Marker
+  fromMarker: string
   midPoints: Point[]
   toPoint: Point
-  toMarker: Marker
+  toMarker: string
   color?: Color
   id: string
   dependencies: Record<string, boolean>

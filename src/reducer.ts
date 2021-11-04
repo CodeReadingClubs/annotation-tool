@@ -1,44 +1,35 @@
 import { AnyAction, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { v4 as uuid } from 'uuid'
-import { Brightness, Color, colors } from './colors'
-import { Arrow, Marker, Point, Rect } from './types'
+import { Color, colors } from './colors'
+import { Arrow, Marker, Point, TextSelection } from './types'
 
 export type State = {
-  code: string | null
   currentSelection: Selection | null
-  markers: Marker[]
-  arrows: Arrow[]
+  markers: Record<string, Marker>
+  arrows: Record<string, Arrow>
   lineAnnotations: Record<number, Record<Color, boolean>>
   colors: Color[]
-  annotationBrightness: Brightness
-  showStraightArrows: boolean
 }
 
 type Selection =
-  | { type: 'text'; rect: Rect }
+  | { type: 'text'; textSelection: TextSelection }
   | { type: 'marker'; marker: Marker }
   | { type: 'arrow'; arrow: Arrow; point: Point }
 
 const initialState: State = {
-  code: null,
   currentSelection: null,
-  markers: [],
-  arrows: [],
+  markers: {},
+  arrows: {},
   lineAnnotations: {},
   colors: colors as unknown as Color[],
-  annotationBrightness: 'medium',
-  showStraightArrows: false,
 }
 
 const { reducer, actions } = createSlice({
   name: 'state',
   initialState,
   reducers: {
-    setCode(state, action: PayloadAction<string>) {
-      state.code = action.payload
-    },
-    selectText(state, action: PayloadAction<Rect>) {
-      state.currentSelection = { type: 'text', rect: action.payload }
+    selectText(state, action: PayloadAction<TextSelection>) {
+      state.currentSelection = { type: 'text', textSelection: action.payload }
     },
     selectMarker(state, action: PayloadAction<Marker>) {
       state.currentSelection = { type: 'marker', marker: action.payload }
@@ -50,37 +41,52 @@ const { reducer, actions } = createSlice({
       state.currentSelection = null
     },
     removeMarker(state, action: PayloadAction<Marker>) {
-      state.markers = state.markers.filter(
-        (marker) => marker.id !== action.payload.id,
-      )
-      state.arrows = removeArrowsWithDependency(state.arrows, action.payload.id)
+      delete state.markers[action.payload.id]
+      const idsToDelete = []
+      for (const arrow of Object.values(state.arrows)) {
+        if (arrow.dependencies[action.payload.id]) {
+          idsToDelete.push(arrow.id)
+        }
+      }
+      idsToDelete.forEach((id) => delete state.arrows[id])
       state.currentSelection = null
     },
     removeArrow(state, action: PayloadAction<Arrow>) {
-      state.arrows = removeArrowsWithDependency(state.arrows, action.payload.id)
+      const idsToDelete = []
+      for (const arrow of Object.values(state.arrows)) {
+        if (
+          arrow.dependencies[action.payload.id] ||
+          arrow.id === action.payload.id
+        ) {
+          idsToDelete.push(arrow.id)
+        }
+      }
+      idsToDelete.forEach((id) => delete state.arrows[id])
       state.currentSelection = null
     },
-    addMarker(state, action: PayloadAction<{ rect: Rect; color: Color }>) {
+    addMarker(
+      state,
+      action: PayloadAction<{ textSelection: TextSelection; color: Color }>,
+    ) {
       if (state.currentSelection?.type === 'text') {
         document.getSelection()?.removeAllRanges()
       }
-      state.markers.push({
-        ...action.payload.rect,
+      const id = uuid()
+      state.markers[id] = {
+        ...action.payload.textSelection,
         color: action.payload.color,
-        id: uuid(),
-      })
+        id,
+      }
       state.currentSelection = null
     },
     addArrow(state, action: PayloadAction<Arrow>) {
-      state.arrows.push(action.payload)
+      state.arrows[action.payload.id] = action.payload
     },
     setMarkerColor(
       state,
       action: PayloadAction<{ marker: Marker; color: Color }>,
     ) {
-      const marker = state.markers.find(
-        ({ id }) => id === action.payload.marker.id,
-      )
+      const marker = state.markers[action.payload.marker.id]
       if (!marker) {
         return
       }
@@ -91,9 +97,7 @@ const { reducer, actions } = createSlice({
       state,
       action: PayloadAction<{ arrow: Arrow; color: Color }>,
     ) {
-      const arrow = state.arrows.find(
-        ({ id }) => id === action.payload.arrow.id,
-      )
+      const arrow = state.arrows[action.payload.arrow.id]
       if (!arrow) {
         return
       }
@@ -110,24 +114,11 @@ const { reducer, actions } = createSlice({
       selectedColors[color] = !(selectedColors[color] ?? false)
       state.lineAnnotations[lineNumber] = selectedColors
     },
-    setShowStraightArrows(state, action: PayloadAction<boolean>) {
-      state.showStraightArrows = action.payload
-    },
-    setAnnotationBrightness(state, action: PayloadAction<Brightness>) {
-      state.annotationBrightness = action.payload
-    },
   },
 })
 
-function removeArrowsWithDependency(arrows: Arrow[], id: string): Arrow[] {
-  return arrows.filter(
-    (arrow) => !(id in arrow.dependencies) && arrow.id !== id,
-  )
-}
-
 export default reducer
 export const {
-  setCode,
   selectText,
   addMarker,
   selectMarker,
@@ -139,8 +130,6 @@ export const {
   setArrowColor,
   clearSelection,
   toggleLineAnnotation,
-  setShowStraightArrows,
-  setAnnotationBrightness,
 } = actions
 
 const undoableActions: Set<string> = new Set([
@@ -151,7 +140,6 @@ const undoableActions: Set<string> = new Set([
   toggleLineAnnotation.type,
   setMarkerColor.type,
   setArrowColor.type,
-  setAnnotationBrightness.type,
 ])
 
 export function isUndoableAction(action: AnyAction): boolean {
@@ -162,8 +150,8 @@ export const emptyAnnotations: Pick<
   State,
   'markers' | 'arrows' | 'lineAnnotations'
 > = {
-  markers: [],
-  arrows: [],
+  markers: {},
+  arrows: {},
   lineAnnotations: {},
 }
 
@@ -172,7 +160,6 @@ export function undoableSlice({
   arrows,
   lineAnnotations,
   colors,
-  annotationBrightness,
 }: State) {
-  return { markers, arrows, lineAnnotations, colors, annotationBrightness }
+  return { markers, arrows, lineAnnotations, colors }
 }
