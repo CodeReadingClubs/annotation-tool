@@ -42,23 +42,26 @@ const { reducer, actions } = createSlice({
     },
     removeMarker(state, action: PayloadAction<Marker>) {
       delete state.markers[action.payload.id]
-      // TODO: mutating record while iterating over it
+      const idsToDelete = []
       for (const arrow of Object.values(state.arrows)) {
         if (arrow.dependencies[action.payload.id]) {
-          delete state.arrows[arrow.id]
+          idsToDelete.push(arrow.id)
         }
       }
+      idsToDelete.forEach((id) => delete state.arrows[id])
       state.currentSelection = null
     },
     removeArrow(state, action: PayloadAction<Arrow>) {
+      const idsToDelete = []
       for (const arrow of Object.values(state.arrows)) {
         if (
           arrow.dependencies[action.payload.id] ||
           arrow.id === action.payload.id
         ) {
-          delete state.arrows[arrow.id]
+          idsToDelete.push(arrow.id)
         }
       }
+      idsToDelete.forEach((id) => delete state.arrows[id])
       state.currentSelection = null
     },
     addMarker(

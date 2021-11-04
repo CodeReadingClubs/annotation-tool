@@ -30,7 +30,6 @@ export default function useTextSelectionHandler(
       const rect = selectionRect(selection)
       const textRange = selectionTextRange(selection)
       const parentRect = containerRef.current.getBoundingClientRect()
-      console.log(selection)
       const rectInContainerCoordinates = {
         top: rect.top - parentRect.top,
         left: rect.left - parentRect.left,
@@ -40,7 +39,6 @@ export default function useTextSelectionHandler(
         right: rect.right - parentRect.left,
         ...textRange,
       }
-      console.log(textRange)
       dispatch(selectText(rectInContainerCoordinates))
     }
   }, [isTextCurrentlySelected])
