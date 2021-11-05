@@ -6,7 +6,7 @@ export default function Export() {
 
   return (
     <div>
-      {navigator.clipboard.write && (
+      {navigator.clipboard.write !== undefined && (
         <button
           disabled={copyState === 'preparing' || copyState === 'success'}
           onClick={copy}
