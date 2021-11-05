@@ -53,12 +53,13 @@ async function copyContainer() {
     // Promise<Blob>. HOWEVER, this doesn't work in Chromium, so we need this
     // highly fragile workaround.
     if (
+      error instanceof Error &&
       error.message ===
-      "Failed to construct 'ClipboardItem': Failed to convert value to 'Blob'."
+        "Failed to construct 'ClipboardItem': Failed to convert value to 'Blob'."
     ) {
       const blob = await containerAsCanvas().then(canvasToBlob)
       const clipboardItem = new ClipboardItem({
-        'image/png': blob,
+        'image/png': blob as unknown as Promise<Blob>,
       })
       await navigator.clipboard.write([clipboardItem])
     } else {
