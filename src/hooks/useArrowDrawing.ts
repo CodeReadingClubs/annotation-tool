@@ -2,10 +2,10 @@ import React, { MouseEvent, useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
 import { distanceBetweenPoints, pointOnLineNearLine } from '../geometry'
 import { addArrow } from '../reducer'
-import { useSettings } from './useSettings'
 import { useDispatch } from '../store'
-import { Arrow, Marker, UnfinishedArrow } from '../types'
-import { pointFromEvent } from '../util'
+import { Arrow, Marker, Point, UnfinishedArrow } from '../types'
+import { useContainer } from './useContainer'
+import { useSettings } from './useSettings'
 
 type SvgMouseEvents = {
   onMouseMove: (event: MouseEvent) => void
@@ -31,9 +31,8 @@ type ReturnType = {
   }
 }
 
-export default function useArrowDrawing(
-  containerRef: React.MutableRefObject<SVGSVGElement | null>,
-): ReturnType {
+export default function useArrowDrawing(): ReturnType {
+  const { eventCoordinates } = useContainer()
   const [drag, setDrag] = React.useState<UnfinishedArrow | null>(null)
   const { showStraightArrows } = useSettings()
   const dispatch = useDispatch()
@@ -41,12 +40,11 @@ export default function useArrowDrawing(
   const onMouseDown = useCallback(
     (event: MouseEvent, target: Marker | Arrow) => {
       event.preventDefault()
-      const currentPoint = pointFromEvent(event, containerRef.current!)
+      const currentPoint = eventCoordinates(event)
       const { fromPoint, fromMarker, dependencies } = dragStartProperties(
-        event,
         target,
         showStraightArrows,
-        containerRef,
+        currentPoint,
       )
       setDrag({
         fromPoint,
@@ -57,7 +55,7 @@ export default function useArrowDrawing(
         dependencies,
       })
     },
-    [containerRef],
+    [eventCoordinates],
   )
 
   const onMouseMove = useCallback(
@@ -72,7 +70,7 @@ export default function useArrowDrawing(
 
       const markerIsOriginMarker = marker?.id === drag.fromMarker
 
-      const currentPoint = pointFromEvent(event, containerRef.current!)
+      const currentPoint = eventCoordinates(event)
       const lastPoint =
         drag.midPoints[drag.midPoints.length - 1] ?? drag.fromPoint
 
@@ -89,7 +87,7 @@ export default function useArrowDrawing(
         toMarker: markerIsOriginMarker ? null : marker?.id ?? null,
       })
     },
-    [containerRef, drag, showStraightArrows],
+    [eventCoordinates, drag, showStraightArrows],
   )
 
   const onMouseUp = useCallback(
@@ -108,14 +106,14 @@ export default function useArrowDrawing(
         fromPoint: drag.fromPoint,
         midPoints: drag.midPoints,
         toMarker: marker.id,
-        toPoint: pointFromEvent(event, containerRef.current!),
+        toPoint: eventCoordinates(event),
         id: uuid(),
         dependencies: { ...drag.dependencies, [marker.id]: true },
       }
       dispatch(addArrow(arrow))
       setDrag(null)
     },
-    [containerRef, drag, setDrag],
+    [eventCoordinates, drag, setDrag],
   )
 
   return {
@@ -138,12 +136,10 @@ export default function useArrowDrawing(
 }
 
 function dragStartProperties(
-  event: MouseEvent,
   target: Arrow | Marker,
   straight: boolean,
-  containerRef: React.MutableRefObject<SVGSVGElement | null>,
+  currentPoint: Point,
 ): Pick<UnfinishedArrow, 'fromPoint' | 'fromMarker' | 'dependencies'> {
-  const currentPoint = pointFromEvent(event, containerRef.current!)
   if ('fromMarker' in target) {
     return {
       fromPoint: straight

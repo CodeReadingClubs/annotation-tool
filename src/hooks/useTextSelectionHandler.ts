@@ -2,11 +2,11 @@ import React from 'react'
 import { clearSelection, selectText } from '../reducer'
 import { useDispatch, useSelector } from '../store'
 import { TextRange } from '../types'
+import { useContainer } from './useContainer'
 
-export default function useTextSelectionHandler(
-  containerRef: React.MutableRefObject<SVGSVGElement | null>,
-) {
+export default function useTextSelectionHandler() {
   const dispatch = useDispatch()
+  const { containerRef } = useContainer()
   const isTextCurrentlySelected = useSelector(
     (state) => state.currentSelection?.type === 'text',
   )

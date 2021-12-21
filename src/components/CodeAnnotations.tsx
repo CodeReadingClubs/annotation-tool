@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react'
 import useArrowDrawing from '../hooks/useArrowDrawing'
+import { ContainerDiv, useContainer } from '../hooks/useContainer'
+import { useSettings } from '../hooks/useSettings'
 import useTextSelectionHandler from '../hooks/useTextSelectionHandler'
 import { selectArrow, selectMarker } from '../reducer'
-import { useSettings } from '../hooks/useSettings'
 import { useDispatch, useSelector } from '../store'
-import { pointFromEvent } from '../util'
 import ArrowLine from './ArrowLine'
 import MarkerRect from './MarkerRect'
 import SelectionPopover from './SelectionPopover'
@@ -15,7 +15,7 @@ export default function CodeAnnotations({
   numberOfLines: number
 }) {
   return (
-    <div
+    <ContainerDiv
       className='svg-container'
       style={{
         gridRow: `1 / span ${numberOfLines}`,
@@ -23,23 +23,21 @@ export default function CodeAnnotations({
     >
       <Svg />
       <SelectionPopover />
-    </div>
+    </ContainerDiv>
   )
 }
 
 function Svg() {
-  const containerRef = React.useRef<SVGSVGElement | null>(null)
   const { showStraightArrows } = useSettings()
-  const { drag, mouseEvents } = useArrowDrawing(containerRef)
+  const { drag, mouseEvents } = useArrowDrawing()
 
-  const selectionChangeHandler = useTextSelectionHandler(containerRef)
+  const selectionChangeHandler = useTextSelectionHandler()
   useEffect(() => {
     document.onselectionchange = selectionChangeHandler
   }, [selectionChangeHandler])
 
   return (
     <svg
-      ref={containerRef}
       style={{
         pointerEvents: drag ? 'auto' : 'none',
       }}
@@ -53,25 +51,22 @@ function Svg() {
           selectable={false}
         />
       )}
-      <Arrows
-        containerRef={containerRef}
-        arrowMouseEvents={mouseEvents.arrow}
-      />
+      <Arrows arrowMouseEvents={mouseEvents.arrow} />
       <Markers markerMouseEvents={mouseEvents.marker} />
     </svg>
   )
 }
 
 type ArrowsProps = {
-  containerRef: React.MutableRefObject<SVGSVGElement | null>
   arrowMouseEvents: ReturnType<typeof useArrowDrawing>['mouseEvents']['arrow']
 }
 
-function Arrows({ containerRef, arrowMouseEvents }: ArrowsProps) {
+function Arrows({ arrowMouseEvents }: ArrowsProps) {
   const dispatch = useDispatch()
   const arrows = useSelector((state) => Object.values(state.arrows))
   const { showStraightArrows } = useSettings()
   const currentSelection = useSelector((state) => state.currentSelection)
+  const { eventCoordinates } = useContainer()
 
   return (
     <>
@@ -84,7 +79,7 @@ function Arrows({ containerRef, arrowMouseEvents }: ArrowsProps) {
             dispatch(
               selectArrow({
                 arrow,
-                point: pointFromEvent(e, containerRef.current!),
+                point: eventCoordinates(e),
               }),
             )
           }
