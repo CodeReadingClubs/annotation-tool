@@ -6,7 +6,6 @@ import { Arrow, UnfinishedArrow } from '../types'
 
 type Props = {
   arrow: Arrow | UnfinishedArrow
-  straight: boolean
   highlighted?: boolean
   selectable: boolean
   onClick?: (event: MouseEvent) => void
@@ -15,7 +14,6 @@ type Props = {
 
 export default function ArrowLine({
   arrow,
-  straight,
   highlighted = false,
   selectable,
   onClick,
@@ -24,13 +22,8 @@ export default function ArrowLine({
   const toMarker = useSelector((state) =>
     arrow.toMarker ? state.markers[arrow.toMarker] : null,
   )
-  const points = pointArrayForArrow(
-    arrow.fromPoint,
-    arrow.midPoints,
-    arrow.toPoint,
-    toMarker,
-    straight,
-  )
+  const points = pointArrayForArrow(arrow, toMarker)
+
   const endPoint = points[points.length - 1]
   const arrowAngle = arrowAngleForPoints(points)
   const pointsString = points.map(({ x, y }) => `${x},${y}`).join(' ')
