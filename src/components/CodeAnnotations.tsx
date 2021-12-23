@@ -4,11 +4,10 @@ import {
   useArrowDrawingEventHandlers,
   useCurrentArrowDrawing,
 } from '../hooks/useArrowDrawing'
-import { ContainerDiv, useContainer } from '../hooks/useContainer'
+import { ContainerDiv } from '../hooks/useContainer'
 import useTextSelectionHandler from '../hooks/useTextSelectionHandler'
-import { selectArrow, selectMarker } from '../reducer'
-import { useDispatch, useSelector } from '../store'
-import ArrowLine from './ArrowLine'
+import { useSelector } from '../store'
+import { FinishedArrowLine, UnfinishedArrowLine } from './ArrowLine'
 import MarkerRect from './MarkerRect'
 import SelectionPopover from './SelectionPopover'
 
@@ -49,7 +48,7 @@ function Svg() {
       onMouseMove={(e) => svgMouseEvents.onMouseMove(e)}
       onMouseUp={(e) => svgMouseEvents.onMouseUp(e)}
     >
-      {currentArrow && <ArrowLine arrow={currentArrow} selectable={false} />}
+      <UnfinishedArrowLine />
       <Arrows />
       <Markers />
     </svg>
@@ -57,27 +56,15 @@ function Svg() {
 }
 
 function Arrows() {
-  const dispatch = useDispatch()
-  const { arrowMouseEvents } = useArrowDrawingEventHandlers()
   const arrows = useSelector((state) => Object.values(state.arrows))
   const currentSelection = useSelector((state) => state.currentSelection)
-  const { eventCoordinates } = useContainer()
 
   return (
     <>
       {arrows.map((arrow) => (
-        <ArrowLine
+        <FinishedArrowLine
           arrow={arrow}
           selectable={currentSelection?.type !== 'text'}
-          onClick={(e) =>
-            dispatch(
-              selectArrow({
-                arrow,
-                point: eventCoordinates(e),
-              }),
-            )
-          }
-          onMouseDown={(e) => arrowMouseEvents.onMouseDown(e, arrow)}
           highlighted={
             currentSelection?.type === 'arrow' &&
             (arrow.id === currentSelection.arrow.id ||
@@ -91,8 +78,6 @@ function Arrows() {
 }
 
 function Markers() {
-  const dispatch = useDispatch()
-  const { markerMouseEvents } = useArrowDrawingEventHandlers()
   const markers = useSelector((state) => Object.values(state.markers))
   const currentSelection = useSelector((state) => state.currentSelection)
 
@@ -103,10 +88,6 @@ function Markers() {
           key={marker.id}
           marker={marker}
           selectable={currentSelection?.type !== 'text'}
-          onClick={() => dispatch(selectMarker(marker))}
-          onMouseDown={(e) => markerMouseEvents.onMouseDown(e, marker)}
-          onMouseMove={(e) => markerMouseEvents.onMouseMove(e, marker)}
-          onMouseUp={(e) => markerMouseEvents.onMouseUp(e, marker)}
         />
       ))}
     </>

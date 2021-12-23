@@ -1,20 +1,26 @@
 import React, { MouseEvent } from 'react'
 import { arrowAngleForPoints, pointArrayForArrow } from '../geometry'
+import {
+  useArrowDrawingEventHandlers,
+  useCurrentArrowDrawing,
+} from '../hooks/useArrowDrawing'
+import { useContainer } from '../hooks/useContainer'
 import useCssColor from '../hooks/useCssColor'
-import { useSelector } from '../store'
+import { selectArrow } from '../reducer'
+import { useDispatch, useSelector } from '../store'
 import { Arrow, UnfinishedArrow } from '../types'
 
 type Props = {
   arrow: Arrow | UnfinishedArrow
-  highlighted?: boolean
+  highlighted: boolean
   selectable: boolean
   onClick?: (event: MouseEvent) => void
   onMouseDown?: (event: MouseEvent) => void
 }
 
-export default function ArrowLine({
+function ArrowLine({
   arrow,
-  highlighted = false,
+  highlighted,
   selectable,
   onClick,
   onMouseDown,
@@ -23,7 +29,6 @@ export default function ArrowLine({
     arrow.toMarker ? state.markers[arrow.toMarker] : null,
   )
   const points = pointArrayForArrow(arrow, toMarker)
-
   const endPoint = points[points.length - 1]
   const arrowAngle = arrowAngleForPoints(points)
   const pointsString = points.map(({ x, y }) => `${x},${y}`).join(' ')
@@ -81,4 +86,45 @@ export default function ArrowLine({
       )}
     </g>
   )
+}
+
+type FinishedArrowLineProps = {
+  arrow: Arrow
+  highlighted: boolean
+  selectable: boolean
+}
+
+export function FinishedArrowLine({
+  arrow,
+  highlighted,
+  selectable,
+}: FinishedArrowLineProps) {
+  const dispatch = useDispatch()
+  const { arrowMouseEvents } = useArrowDrawingEventHandlers()
+  const { eventCoordinates } = useContainer()
+
+  return (
+    <ArrowLine
+      arrow={arrow}
+      selectable={selectable}
+      highlighted={highlighted}
+      onClick={(event) =>
+        dispatch(
+          selectArrow({
+            arrow,
+            point: eventCoordinates(event),
+          }),
+        )
+      }
+      onMouseDown={(event) => arrowMouseEvents.onMouseDown(event, arrow)}
+    />
+  )
+}
+
+export function UnfinishedArrowLine() {
+  const arrow = useCurrentArrowDrawing()
+  if (!arrow) {
+    return null
+  }
+  return <ArrowLine arrow={arrow} highlighted={false} selectable={false} />
 }
