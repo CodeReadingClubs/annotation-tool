@@ -8,31 +8,46 @@ import { useContainer } from './useContainer'
 import useKeyboardHandler from './useKeyboardHandler'
 import { useSettings } from './useSettings'
 
-type SvgMouseEvents = {
+// TYPES
+
+export type EventHandlers = {
+  svgMouseEvents: SvgMouseEventHandlers
+  markerMouseEvents: MarkerMouseEventHandlers
+  arrowMouseEvents: ArrowMouseEventHandlers
+}
+
+type SvgMouseEventHandlers = {
   onMouseMove: (event: MouseEvent) => void
   onMouseUp: (event: MouseEvent) => void
 }
 
-type MarkerMouseEvents = {
+type MarkerMouseEventHandlers = {
   onMouseDown: (event: MouseEvent, marker: Marker) => void
   onMouseMove: (event: MouseEvent, marker: Marker) => void
   onMouseUp: (event: MouseEvent, marker: Marker) => void
 }
 
-type ArrowMouseEvents = {
+type ArrowMouseEventHandlers = {
   onMouseDown: (event: MouseEvent, arrow: Arrow) => void
 }
 
-type ReturnType = {
-  currentArrow: UnfinishedArrow | null
-  mouseEvents: {
-    svg: SvgMouseEvents
-    marker: MarkerMouseEvents
-    arrow: ArrowMouseEvents
-  }
-}
+// CONTEXTS
 
-export default function useArrowDrawing(): ReturnType {
+const CurrentArrowContext = React.createContext<
+  UnfinishedArrow | null | undefined
+>(undefined)
+CurrentArrowContext.displayName = 'CurrentArrowContext'
+
+const EventHandlersContext = React.createContext<EventHandlers | undefined>(
+  undefined,
+)
+EventHandlersContext.displayName = 'EventHandlersContext'
+
+// PROVIDER
+
+export function ArrowDrawingProvider({
+  children,
+}: React.PropsWithChildren<{}>) {
   const { eventCoordinates } = useContainer()
   const [currentArrow, setCurrentArrow] =
     React.useState<UnfinishedArrow | null>(null)
@@ -123,27 +138,58 @@ export default function useArrowDrawing(): ReturnType {
       dispatch(addArrow(arrow))
       setCurrentArrow(null)
     },
-    [eventCoordinates, currentArrow, setCurrentArrow],
+    [eventCoordinates, currentArrow],
   )
 
-  return {
-    currentArrow,
-    mouseEvents: {
-      svg: {
-        onMouseMove: (e) => onMouseMove(e),
-        onMouseUp: (e) => onMouseUp(e),
-      },
-      marker: {
-        onMouseDown: (e, marker) => onMouseDown(e, marker),
-        onMouseMove: (e, marker) => onMouseMove(e, marker),
-        onMouseUp: (e, marker) => onMouseUp(e, marker),
-      },
-      arrow: {
-        onMouseDown: (e, arrow) => onMouseDown(e, arrow),
-      },
+  const handlers: EventHandlers = {
+    svgMouseEvents: {
+      onMouseMove: (event) => onMouseMove(event),
+      onMouseUp: (event) => onMouseUp(event),
+    },
+    markerMouseEvents: {
+      onMouseDown: (event, marker) => onMouseDown(event, marker),
+      onMouseMove: (event, marker) => onMouseMove(event, marker),
+      onMouseUp: (event, marker) => onMouseUp(event, marker),
+    },
+    arrowMouseEvents: {
+      onMouseDown: (event, arrow: Arrow) => onMouseDown(event, arrow),
     },
   }
+
+  return (
+    <CurrentArrowContext.Provider value={currentArrow}>
+      <EventHandlersContext.Provider value={handlers}>
+        {children}
+      </EventHandlersContext.Provider>
+    </CurrentArrowContext.Provider>
+  )
 }
+
+// HOOKS
+
+export function useArrowDrawingEventHandlers(): EventHandlers {
+  const handlers = React.useContext(EventHandlersContext)
+  if (!handlers) {
+    throw new Error(
+      `Tried to call useArrowDrawingEventHandlers outside of an <ArrowDrawingProvider>`,
+    )
+  }
+
+  return handlers
+}
+
+export function useCurrentArrowDrawing(): UnfinishedArrow | null {
+  const currentArrow = React.useContext(CurrentArrowContext)
+  if (currentArrow === undefined) {
+    throw new Error(
+      `Tried to call useCurrentArrowDrawing outside of an <ArrowDrawingProvider>`,
+    )
+  }
+
+  return currentArrow
+}
+
+// UTILITIES
 
 function dragStartProperties(
   target: Arrow | Marker,
