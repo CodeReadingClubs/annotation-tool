@@ -5,6 +5,7 @@ import { addArrow } from '../reducer'
 import { useDispatch } from '../store'
 import { Arrow, Marker, Point, UnfinishedArrow } from '../types'
 import { useContainer } from './useContainer'
+import useKeyboardHandler from './useKeyboardHandler'
 import { useSettings } from './useSettings'
 
 type SvgMouseEvents = {
@@ -36,6 +37,13 @@ export default function useArrowDrawing(): ReturnType {
   const [drag, setDrag] = React.useState<UnfinishedArrow | null>(null)
   const { showStraightArrows } = useSettings()
   const dispatch = useDispatch()
+
+  const escapeKeyHandler = React.useCallback((event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      setDrag(null)
+    }
+  }, [])
+  useKeyboardHandler(escapeKeyHandler)
 
   const onMouseDown = useCallback(
     (event: MouseEvent, target: Marker | Arrow) => {
