@@ -1,6 +1,6 @@
 import React, { MouseEvent, useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
-import { distanceBetweenPoints, pointOnLineNearLine } from '../geometry'
+import { distanceBetweenPoints, pointOnPolylineNearPoint } from '../geometry'
 import { addArrow } from '../reducer'
 import { useDispatch } from '../store'
 import { Arrow, Marker, Point, UnfinishedArrow } from '../types'
@@ -63,7 +63,7 @@ export default function useArrowDrawing(): ReturnType {
         dependencies,
       })
     },
-    [eventCoordinates],
+    [eventCoordinates, showStraightArrows],
   )
 
   const onMouseMove = useCallback(
@@ -145,14 +145,16 @@ export default function useArrowDrawing(): ReturnType {
 
 function dragStartProperties(
   target: Arrow | Marker,
-  straight: boolean,
+  showStraightArrows: boolean,
   currentPoint: Point,
 ): Pick<UnfinishedArrow, 'fromPoint' | 'fromMarker' | 'dependencies'> {
   if ('fromMarker' in target) {
     return {
-      fromPoint: straight
-        ? pointOnLineNearLine(target.fromPoint, target.toPoint, currentPoint)
-        : currentPoint,
+      fromPoint: pointOnPolylineNearPoint(currentPoint, [
+        target.fromPoint,
+        ...target.midPoints,
+        target.toPoint,
+      ]),
       fromMarker: target.fromMarker,
       dependencies: {
         ...target.dependencies,
