@@ -27,7 +27,7 @@ export default function CodeAnnotations({
 }
 
 function Svg() {
-  const { drag, mouseEvents } = useArrowDrawing()
+  const { currentArrow, mouseEvents } = useArrowDrawing()
 
   const selectionChangeHandler = useTextSelectionHandler()
   useEffect(() => {
@@ -37,12 +37,12 @@ function Svg() {
   return (
     <svg
       style={{
-        pointerEvents: drag ? 'auto' : 'none',
+        pointerEvents: currentArrow ? 'auto' : 'none',
       }}
       onMouseMove={(e) => mouseEvents.svg.onMouseMove(e)}
       onMouseUp={(e) => mouseEvents.svg.onMouseUp(e)}
     >
-      {drag && <ArrowLine arrow={drag} selectable={false} />}
+      {currentArrow && <ArrowLine arrow={currentArrow} selectable={false} />}
       <Arrows arrowMouseEvents={mouseEvents.arrow} />
       <Markers markerMouseEvents={mouseEvents.marker} />
     </svg>
