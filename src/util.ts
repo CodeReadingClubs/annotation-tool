@@ -24,14 +24,7 @@ export function minBy<T>(
   return [minItem, minIndex]
 }
 
-export function pairs<T>(array: T[]): [T, T][] {
-  return range(0, array.length - 1).map((index) => [
-    array[index],
-    array[index + 1],
-  ])
-}
-
-function range(min: number, max: number): number[] {
+export function range(min: number, max: number): number[] {
   if (max < min) {
     return []
   }

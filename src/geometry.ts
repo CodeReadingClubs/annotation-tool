@@ -1,5 +1,5 @@
 import { Arrow, Marker, Point, Rect, UnfinishedArrow } from './types'
-import { findLast, isMonotonous, minBy, pairs } from './util'
+import { findLast, isMonotonous, minBy, range } from './util'
 
 export function distanceBetweenPoints(a: Point, b: Point): number {
   return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y))
@@ -133,6 +133,13 @@ export function pointOnPolylineNearPoint(p: Point, polyline: Point[]): Point {
   }
 
   return pointOnNearestSegment[0]
+}
+
+function pairs<T>(array: T[]): [T, T][] {
+  return range(0, array.length - 1).map((index) => [
+    array[index],
+    array[index + 1],
+  ])
 }
 
 function pointOnLineNearPoint(
