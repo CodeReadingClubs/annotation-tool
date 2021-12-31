@@ -1,20 +1,15 @@
-import { Marker, Point, Rect } from './types'
-import { findLast, isMonotonous, minBy } from './util'
+import { Arrow, Marker, Point, Rect, UnfinishedArrow } from './types'
+import { findLast, isMonotonous, minBy, range } from './util'
 
 export function distanceBetweenPoints(a: Point, b: Point): number {
   return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y))
 }
 
 export function pointArrayForArrow(
-  fromPoint: Point,
-  midPoints: Point[],
-  toPoint: Point,
+  arrow: Arrow | UnfinishedArrow,
   toMarker: Marker | null,
-  straight: boolean,
 ): Point[] {
-  const allPoints = straight
-    ? [fromPoint, toPoint]
-    : [fromPoint, ...midPoints, toPoint]
+  const allPoints = [arrow.fromPoint, ...arrow.midPoints, arrow.toPoint]
 
   if (!toMarker || allPoints.every((pt) => !isPointInRect(pt, toMarker))) {
     return allPoints
@@ -125,20 +120,43 @@ function verticalLineIntersection(
   }
 }
 
-export function pointOnLineNearLine(
+export function pointOnPolylineNearPoint(p: Point, polyline: Point[]): Point {
+  const pointsOnSegments = pairs(polyline).map((segment) =>
+    pointOnLineNearPoint(...segment, p),
+  )
+
+  const pointOnNearestSegment = minBy(pointsOnSegments, (pt) =>
+    distanceBetweenPoints(p, pt),
+  )
+  if (!pointOnNearestSegment) {
+    throw new Error(`Not enough points on polyline`)
+  }
+
+  return pointOnNearestSegment[0]
+}
+
+function pairs<T>(array: T[]): [T, T][] {
+  return range(0, array.length - 1).map((index) => [
+    array[index],
+    array[index + 1],
+  ])
+}
+
+function pointOnLineNearPoint(
   p1: Point,
   p2: Point,
   { x: x0, y: y0 }: Point,
 ): Point {
-  const a = p2.y - p1.y
-  const b = p1.x - p2.x
-  const c = p1.y * p2.x - p1.x * p2.y
+  const d = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2))
+  const n = { x: (p2.x - p1.x) / d, y: (p2.y - p1.y) / d }
+  const t0 = (x0 - p1.x) * n.x + (y0 - p1.y) * n.y
+  if (t0 <= 0) {
+    return p1
+  } else if (t0 >= d) {
+    return p2
+  }
 
-  const denom = a * a + b * b
-  const paren = a * y0 - b * x0
-  const x = (-b * paren - a * c) / denom
-  const y = (a * paren - b * c) / denom
-  return { x, y }
+  return { x: p1.x + t0 * n.x, y: p1.y + t0 * n.y }
 }
 
 export function isPointInRect(

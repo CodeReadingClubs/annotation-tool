@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import useArrowDrawing from '../hooks/useArrowDrawing'
 import { ContainerDiv, useContainer } from '../hooks/useContainer'
-import { useSettings } from '../hooks/useSettings'
 import useTextSelectionHandler from '../hooks/useTextSelectionHandler'
 import { selectArrow, selectMarker } from '../reducer'
 import { useDispatch, useSelector } from '../store'
@@ -28,8 +27,7 @@ export default function CodeAnnotations({
 }
 
 function Svg() {
-  const { showStraightArrows } = useSettings()
-  const { drag, mouseEvents } = useArrowDrawing()
+  const { currentArrow, mouseEvents } = useArrowDrawing()
 
   const selectionChangeHandler = useTextSelectionHandler()
   useEffect(() => {
@@ -39,18 +37,12 @@ function Svg() {
   return (
     <svg
       style={{
-        pointerEvents: drag ? 'auto' : 'none',
+        pointerEvents: currentArrow ? 'auto' : 'none',
       }}
       onMouseMove={(e) => mouseEvents.svg.onMouseMove(e)}
       onMouseUp={(e) => mouseEvents.svg.onMouseUp(e)}
     >
-      {drag && (
-        <ArrowLine
-          arrow={drag}
-          straight={showStraightArrows}
-          selectable={false}
-        />
-      )}
+      {currentArrow && <ArrowLine arrow={currentArrow} selectable={false} />}
       <Arrows arrowMouseEvents={mouseEvents.arrow} />
       <Markers markerMouseEvents={mouseEvents.marker} />
     </svg>
@@ -64,7 +56,6 @@ type ArrowsProps = {
 function Arrows({ arrowMouseEvents }: ArrowsProps) {
   const dispatch = useDispatch()
   const arrows = useSelector((state) => Object.values(state.arrows))
-  const { showStraightArrows } = useSettings()
   const currentSelection = useSelector((state) => state.currentSelection)
   const { eventCoordinates } = useContainer()
 
@@ -73,7 +64,6 @@ function Arrows({ arrowMouseEvents }: ArrowsProps) {
       {arrows.map((arrow) => (
         <ArrowLine
           arrow={arrow}
-          straight={showStraightArrows}
           selectable={currentSelection?.type !== 'text'}
           onClick={(e) =>
             dispatch(

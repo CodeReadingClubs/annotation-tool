@@ -12,16 +12,23 @@ export function minBy<T>(
   let minItem = array[minIndex]
   let minValue = value(minItem)
 
-  array.slice(1).forEach((item, index) => {
-    const currentValue = value(item)
+  range(1, array.length).map((index) => {
+    const currentValue = value(array[index])
     if (currentValue < minValue) {
       minValue = currentValue
-      minItem = item
+      minItem = array[index]
       minIndex = index
     }
   })
 
   return [minItem, minIndex]
+}
+
+export function range(min: number, max: number): number[] {
+  if (max < min) {
+    return []
+  }
+  return new Array(max - min).fill(0).map((_, index) => min + index)
 }
 
 export function isMonotonous(a: number, b: number, c: number): boolean {

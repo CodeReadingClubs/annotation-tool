@@ -1,6 +1,6 @@
 import React, { MouseEvent, useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
-import { distanceBetweenPoints, pointOnLineNearLine } from '../geometry'
+import { distanceBetweenPoints, pointOnPolylineNearPoint } from '../geometry'
 import { addArrow } from '../reducer'
 import { useDispatch } from '../store'
 import { Arrow, Marker, Point, UnfinishedArrow } from '../types'
@@ -24,7 +24,7 @@ type ArrowMouseEvents = {
 }
 
 type ReturnType = {
-  drag: UnfinishedArrow | null
+  currentArrow: UnfinishedArrow | null
   mouseEvents: {
     svg: SvgMouseEvents
     marker: MarkerMouseEvents
@@ -34,13 +34,14 @@ type ReturnType = {
 
 export default function useArrowDrawing(): ReturnType {
   const { eventCoordinates } = useContainer()
-  const [drag, setDrag] = React.useState<UnfinishedArrow | null>(null)
+  const [currentArrow, setCurrentArrow] =
+    React.useState<UnfinishedArrow | null>(null)
   const { showStraightArrows } = useSettings()
   const dispatch = useDispatch()
 
   const escapeKeyHandler = React.useCallback((event: KeyboardEvent) => {
     if (event.key === 'Escape') {
-      setDrag(null)
+      setCurrentArrow(null)
     }
   }, [])
   useKeyboardHandler(escapeKeyHandler)
@@ -54,7 +55,7 @@ export default function useArrowDrawing(): ReturnType {
         showStraightArrows,
         currentPoint,
       )
-      setDrag({
+      setCurrentArrow({
         fromPoint,
         fromMarker,
         midPoints: [],
@@ -63,12 +64,12 @@ export default function useArrowDrawing(): ReturnType {
         dependencies,
       })
     },
-    [eventCoordinates],
+    [eventCoordinates, showStraightArrows],
   )
 
   const onMouseMove = useCallback(
     (event: MouseEvent, marker: Marker | null = null) => {
-      if (!drag) {
+      if (!currentArrow) {
         return
       }
 
@@ -76,56 +77,57 @@ export default function useArrowDrawing(): ReturnType {
         event.stopPropagation()
       }
 
-      const markerIsOriginMarker = marker?.id === drag.fromMarker
+      const markerIsOriginMarker = marker?.id === currentArrow.fromMarker
 
       const currentPoint = eventCoordinates(event)
       const lastPoint =
-        drag.midPoints[drag.midPoints.length - 1] ?? drag.fromPoint
+        currentArrow.midPoints[currentArrow.midPoints.length - 1] ??
+        currentArrow.fromPoint
 
       const newMidPoints =
         !showStraightArrows &&
         distanceBetweenPoints(currentPoint, lastPoint) > 10
-          ? [...drag.midPoints, currentPoint]
-          : drag.midPoints
+          ? [...currentArrow.midPoints, currentPoint]
+          : currentArrow.midPoints
 
-      setDrag({
-        ...drag,
+      setCurrentArrow({
+        ...currentArrow,
         midPoints: newMidPoints,
         toPoint: currentPoint,
         toMarker: markerIsOriginMarker ? null : marker?.id ?? null,
       })
     },
-    [eventCoordinates, drag, showStraightArrows],
+    [eventCoordinates, currentArrow, showStraightArrows],
   )
 
   const onMouseUp = useCallback(
     (event: MouseEvent, marker: Marker | null = null) => {
-      if (!drag) {
+      if (!currentArrow) {
         return
       }
 
-      if (!marker || marker.id === drag.fromMarker) {
-        setDrag(null)
+      if (!marker || marker.id === currentArrow.fromMarker) {
+        setCurrentArrow(null)
         return
       }
 
       const arrow = {
-        fromMarker: drag.fromMarker,
-        fromPoint: drag.fromPoint,
-        midPoints: drag.midPoints,
+        fromMarker: currentArrow.fromMarker,
+        fromPoint: currentArrow.fromPoint,
+        midPoints: currentArrow.midPoints,
         toMarker: marker.id,
         toPoint: eventCoordinates(event),
         id: uuid(),
-        dependencies: { ...drag.dependencies, [marker.id]: true },
+        dependencies: { ...currentArrow.dependencies, [marker.id]: true },
       }
       dispatch(addArrow(arrow))
-      setDrag(null)
+      setCurrentArrow(null)
     },
-    [eventCoordinates, drag, setDrag],
+    [eventCoordinates, currentArrow, setCurrentArrow],
   )
 
   return {
-    drag,
+    currentArrow,
     mouseEvents: {
       svg: {
         onMouseMove: (e) => onMouseMove(e),
@@ -145,14 +147,16 @@ export default function useArrowDrawing(): ReturnType {
 
 function dragStartProperties(
   target: Arrow | Marker,
-  straight: boolean,
+  showStraightArrows: boolean,
   currentPoint: Point,
 ): Pick<UnfinishedArrow, 'fromPoint' | 'fromMarker' | 'dependencies'> {
   if ('fromMarker' in target) {
     return {
-      fromPoint: straight
-        ? pointOnLineNearLine(target.fromPoint, target.toPoint, currentPoint)
-        : currentPoint,
+      fromPoint: pointOnPolylineNearPoint(currentPoint, [
+        target.fromPoint,
+        ...target.midPoints,
+        target.toPoint,
+      ]),
       fromMarker: target.fromMarker,
       dependencies: {
         ...target.dependencies,
