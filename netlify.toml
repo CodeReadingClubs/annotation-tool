@@ -2,10 +2,11 @@
   command = "npm run build"
   publish = "dist"
 
-  #[[redirects]]
-  #  from = "/*"
-  #  to = "/index.html"
-  #  status = 200
+[[redirects]]
+  from = "/*"
+  to = "https://annotate.codereading.club/:splat"
+  status = 301
+  force = true
 
   #[dev]
   #  command = "npm run dev"
