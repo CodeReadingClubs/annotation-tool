@@ -1,5 +1,6 @@
 {
-  "name": "annotation-tool",
+  "name": "code-annotation-tool",
+  "license": "MIT",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
