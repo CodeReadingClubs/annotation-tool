@@ -3,7 +3,7 @@
   publish = "dist"
 
 [[redirects]]
-  from = "/*"
+  from = "https://annotate.code-reading.org/*"
   to = "https://annotate.codereading.club/:splat"
   status = 301
   force = true
