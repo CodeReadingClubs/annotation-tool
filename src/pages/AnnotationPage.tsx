@@ -3,6 +3,7 @@ import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import Code from '../components/Code'
 import Controls from '../components/Controls'
+import { Footer } from '../components/Footer'
 import useCode from '../hooks/useCode'
 import useKeyboardHandler from '../hooks/useKeyboardHandler'
 import useSource from '../hooks/useSource'
@@ -17,7 +18,12 @@ export default function AnnotationPage() {
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-        <AnnotationPageContent />
+        <div className='annotation-page'>
+          <main>
+            <AnnotationPageContent />
+          </main>
+          <Footer />
+        </div>
       </PersistGate>
     </Provider>
   )
@@ -28,13 +34,13 @@ function AnnotationPageContent() {
   const { code, error } = useCode(source)
 
   if (code) {
-    return <LoadedPage code={code} />
+    return <LoadedPageContent code={code} />
   } else {
-    return <LoadingPage error={error} />
+    return <LoadingPageContent error={error} />
   }
 }
 
-function LoadingPage({ error }: { error: Error | null }) {
+function LoadingPageContent({ error }: { error: Error | null }) {
   if (error) {
     return (
       <div>Oh no! Something went wrong while trying to fetch the code.</div>
@@ -44,16 +50,16 @@ function LoadingPage({ error }: { error: Error | null }) {
   }
 }
 
-function LoadedPage({ code }: { code: string }) {
+function LoadedPageContent({ code }: { code: string }) {
   useReducerKeyboardHandler()
 
   return (
-    <div>
+    <>
       <Controls />
       <div className='container'>
         <Code code={code} />
       </div>
-    </div>
+    </>
   )
 }
 

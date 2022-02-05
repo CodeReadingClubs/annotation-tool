@@ -171,3 +171,21 @@ body {
     max-width: 95%;
   }
 }
+
+.home-page,
+.annotation-page {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 4rem);
+
+  main {
+    flex-grow: 1;
+  }
+
+  footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 1rem;
+  }
+}

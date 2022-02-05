@@ -2,25 +2,29 @@ import React, { ChangeEvent, FormEvent, useCallback, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import * as github from '../github'
 import { Source, sourceHash } from '../source'
+import { Footer } from './../components/Footer'
 
 export default function SourceSelectionPage() {
   return (
-    <div>
-      <h1>Code Annotation Tool</h1>
-      <p>
-        Use this to annotate code in{' '}
-        <a href='https://code-reading.org'>Code Reading Clubs</a>.
-      </p>
-      <p>
-        To use it, open the desired file on GitHub, press <code>Y</code> (this
-        changes the url to a permalink) and copy the url. It should look
-        something like this:
-      </p>
-      <code>
-        https://github.com/owner/repo/blob/908de054006934a071f770906119ce6d35a5a612/some/file/path.ext
-      </code>
-      <p>Paste it below:</p>
-      <Form />
+    <div className='home-page'>
+      <main>
+        <h1>Code Annotation Tool</h1>
+        <p>
+          Use this to annotate code in{' '}
+          <a href='https://code-reading.org'>Code Reading Clubs</a>.
+        </p>
+        <p>
+          To use it, open the desired file on GitHub, press <code>Y</code> (this
+          changes the url to a permalink) and copy the url. It should look
+          something like this:
+        </p>
+        <code>
+          https://github.com/owner/repo/blob/908de054006934a071f770906119ce6d35a5a612/some/file/path.ext
+        </code>
+        <p>Paste it below:</p>
+        <Form />
+      </main>
+      <Footer />
     </div>
   )
 }
