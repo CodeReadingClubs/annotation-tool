@@ -11,7 +11,7 @@ export default function SourceSelectionPage() {
         <h1>Code Annotation Tool</h1>
         <p>
           Use this to annotate code in{' '}
-          <a href='https://code-reading.org'>Code Reading Clubs</a>.
+          <a href='https://codereading.club'>Code Reading Clubs</a>.
         </p>
         <p>
           To use it, open the desired file on GitHub, press <code>Y</code> (this

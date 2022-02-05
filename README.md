@@ -1,8 +1,8 @@
 # Code Annotation Tool
 
-A tool to annotate code for [code reading clubs](https://code-reading.org).
+A tool to annotate code for [code reading clubs](https://codereading.club).
 
-[Check it out](https://annotate.code-reading.org)!
+[Check it out](https://annotate.codereading.club)!
 
 ## Running
 
