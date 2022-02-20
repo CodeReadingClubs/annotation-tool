@@ -13,9 +13,10 @@ type Props = {
 export default function MarkerRect({ marker, selectable }: Props) {
   const color = useCssColor(marker.color)
   const dispatch = useDispatch()
-  const { onClick, onMouseMove } = useDrawingEventHandlers()
+  const drawing = useDrawingEventHandlers()
   const onContextMenu = (event: React.MouseEvent) => {
     event.preventDefault()
+    drawing.cancelArrow()
     dispatch(selectMarker(marker))
   }
 
@@ -28,8 +29,8 @@ export default function MarkerRect({ marker, selectable }: Props) {
       fill={color}
       style={{ pointerEvents: selectable ? 'auto' : 'none' }}
       onContextMenu={onContextMenu}
-      onClick={(event) => onClick(event, marker)}
-      onMouseMove={(event) => onMouseMove(event, marker)}
+      onClick={(event) => drawing.onClick(event, marker)}
+      onMouseMove={(event) => drawing.onMouseMove(event, marker)}
     ></rect>
   )
 }

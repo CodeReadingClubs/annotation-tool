@@ -105,9 +105,10 @@ export function FinishedArrowLine({
   const onContextMenu = React.useCallback(
     (event: MouseEvent) => {
       event.preventDefault()
+      drawing.cancelArrow()
       dispatch(selectArrow({ arrow, point: eventCoordinates(event) }))
     },
-    [eventCoordinates],
+    [eventCoordinates, drawing.cancelArrow],
   )
 
   return (
