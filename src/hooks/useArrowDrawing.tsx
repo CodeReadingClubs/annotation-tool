@@ -13,6 +13,7 @@ import { useSettings } from './useSettings'
 type EventHandlers = {
   onClick: (event: React.MouseEvent, target: Marker | Arrow | null) => void
   onMouseMove: (event: React.MouseEvent, target: Marker | null) => void
+  cancelArrow: () => void
 }
 
 // CONTEXTS
@@ -99,12 +100,17 @@ export function ArrowDrawingProvider({
     [currentArrow, eventCoordinates],
   )
 
+  const cancelArrow = React.useCallback(() => {
+    setCurrentArrow(null)
+  }, [])
+
   const handlers: EventHandlers = React.useMemo(
     () => ({
       onClick,
       onMouseMove,
+      cancelArrow,
     }),
-    [onClick, onMouseMove],
+    [onClick, onMouseMove, cancelArrow],
   )
 
   return (

@@ -25,6 +25,7 @@ export default function CodeAnnotations({
     >
       <ArrowDrawingProvider>
         <Svg />
+        <DrawingCancelationButton />
         <SelectionPopover />
       </ArrowDrawingProvider>
     </ContainerDiv>
@@ -91,5 +92,21 @@ function Markers() {
         />
       ))}
     </>
+  )
+}
+
+function DrawingCancelationButton() {
+  const currentArrow = useCurrentArrowDrawing()
+  const drawing = useDrawingEventHandlers()
+  if (!currentArrow) {
+    return null
+  }
+  return (
+    <button
+      className='drawing-cancelation-button'
+      onClick={() => drawing.cancelArrow()}
+    >
+      To cancel the current arrow, hit <kbd>esc</kbd> or click here
+    </button>
   )
 }
