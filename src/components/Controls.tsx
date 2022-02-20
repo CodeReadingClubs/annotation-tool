@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { Brightness } from '../colors'
-import { useSettings } from '../hooks/useSettings'
+import { ArrowDrawingMode, useSettings } from '../hooks/useSettings'
 import useSource from '../hooks/useSource'
 import { localStorageKey } from '../source'
 import { useDispatch } from '../store'
@@ -9,17 +9,11 @@ import Export from './Export'
 
 export default function Controls() {
   const dispatch = useDispatch()
-  const { showStraightArrows, setShowStraightArrows } = useSettings()
+  const { arrowDrawingMode, setArrowDrawingMode } = useSettings()
 
   return (
     <div className='annotation-controls'>
-      <input
-        type='checkbox'
-        id='straight-arrows'
-        checked={showStraightArrows}
-        onChange={(e) => setShowStraightArrows(e.target.checked)}
-      />
-      <label htmlFor='straight-arrows'>Use straight arrows</label>
+      <DrawingMode />
       <UndoManagement />
       <AnnotationBrightness />
       <Export />
@@ -28,41 +22,45 @@ export default function Controls() {
   )
 }
 
+const drawingModeOptions: { title: string; value: ArrowDrawingMode }[] = [
+  { title: 'Freehand', value: 'freehand' },
+  { title: 'Jointed', value: 'jointed' },
+]
+
+function DrawingMode() {
+  const { arrowDrawingMode, setArrowDrawingMode } = useSettings()
+
+  return (
+    <div>
+      <span>Arrow drawing mode: </span>
+      <RadioGroup
+        name='arrow-drawing-mode'
+        options={drawingModeOptions}
+        selectedValue={arrowDrawingMode}
+        onSelect={setArrowDrawingMode}
+      />
+    </div>
+  )
+}
+
+const brightnessOptions: { title: string; value: Brightness }[] = [
+  { title: 'Light', value: 'light' },
+  { title: 'Medium', value: 'medium' },
+  { title: 'Dark', value: 'dark' },
+]
+
 function AnnotationBrightness() {
-  const { annotationBrightness: brightness, setAnnotationBrightness } =
-    useSettings()
-
-  function RadioItem({ value, title }: { value: Brightness; title: string }) {
-    const id = `annotation-brightness--${value}`
-    return (
-      <>
-        <input
-          type='radio'
-          name='annotation-brightness'
-          id={id}
-          value={value}
-          checked={brightness === value}
-          onChange={(event) =>
-            setAnnotationBrightness(event.target.value as Brightness)
-          }
-        />
-        <label htmlFor={id}>{title}</label>
-      </>
-    )
-  }
-
-  const radios: [Brightness, string][] = [
-    ['light', 'Light'],
-    ['medium', 'Medium'],
-    ['dark', 'Dark'],
-  ]
+  const { annotationBrightness, setAnnotationBrightness } = useSettings()
 
   return (
     <div>
       <span>Annotation brightness: </span>
-      {radios.map(([value, title]) => (
-        <RadioItem value={value} title={title} key={value} />
-      ))}
+      <RadioGroup
+        name='annotation-brightness'
+        options={brightnessOptions}
+        selectedValue={annotationBrightness}
+        onSelect={setAnnotationBrightness}
+      />
     </div>
   )
 }
@@ -111,5 +109,61 @@ function PersistedStateDebugging() {
       <button onClick={copy}>copy persisted state</button>
       <button onClick={paste}>paste persisted state</button>
     </div>
+  )
+}
+
+function RadioGroup<Value extends string>({
+  name,
+  options,
+  selectedValue,
+  onSelect,
+}: {
+  name: string
+  options: { title: string; value: Value }[]
+  selectedValue: Value
+  onSelect: (value: Value) => void
+}) {
+  return (
+    <>
+      {options.map(({ title, value }) => (
+        <RadioItem<Value>
+          key={value}
+          name={name}
+          title={title}
+          value={value}
+          selectedValue={selectedValue}
+          onSelect={onSelect}
+        />
+      ))}
+    </>
+  )
+}
+
+function RadioItem<Value extends string>({
+  title,
+  name,
+  value,
+  selectedValue,
+  onSelect,
+}: {
+  title: string
+  name: string
+  value: Value
+  selectedValue: Value
+  onSelect: (value: Value) => void
+}) {
+  const id = `${name}--${value}`
+  return (
+    <>
+      <input
+        type='radio'
+        name={name}
+        id={id}
+        value={value}
+        checked={value === selectedValue}
+        onChange={(event) => onSelect(event.target.value as Value)}
+      />
+      <label htmlFor={id}>{title}</label>
+    </>
   )
 }

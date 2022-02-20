@@ -6,7 +6,7 @@ import { useDispatch } from '../store'
 import { Arrow, Marker, Point, UnfinishedArrow } from '../types'
 import { useContainer } from './useContainer'
 import useKeyboardHandler from './useKeyboardHandler'
-import { useSettings } from './useSettings'
+import { ArrowDrawingMode, useSettings } from './useSettings'
 
 // TYPES
 
@@ -36,7 +36,7 @@ export function ArrowDrawingProvider({
   const { eventCoordinates } = useContainer()
   const [currentArrow, setCurrentArrow] =
     React.useState<UnfinishedArrow | null>(null)
-  const { showStraightArrows } = useSettings()
+  const { arrowDrawingMode } = useSettings()
   const dispatch = useDispatch()
 
   const escapeKeyHandler = React.useCallback((event: KeyboardEvent) => {
@@ -55,7 +55,7 @@ export function ArrowDrawingProvider({
       const currentPoint = eventCoordinates(event)
       if (!currentArrow) {
         if (target) {
-          setCurrentArrow(newArrow(target, showStraightArrows, currentPoint))
+          setCurrentArrow(newArrow(target, arrowDrawingMode, currentPoint))
         }
       } else if (targetIsOrigin(target, currentArrow)) {
         setCurrentArrow(null)
@@ -69,7 +69,7 @@ export function ArrowDrawingProvider({
         })
       }
     },
-    [eventCoordinates, currentArrow, showStraightArrows],
+    [eventCoordinates, currentArrow, arrowDrawingMode],
   )
 
   const onMouseMove = useCallback(
@@ -150,10 +150,9 @@ export function useCurrentArrowDrawing(): UnfinishedArrow | null {
 
 function newArrow(
   target: Arrow | Marker,
-  showStraightArrows: boolean,
+  drawingMode: ArrowDrawingMode,
   currentPoint: Point,
 ): UnfinishedArrow {
-  const drawingMode = showStraightArrows ? 'jointed' : 'freehand'
   if (isArrow(target)) {
     const fromPoint = pointOnPolylineNearPoint(currentPoint, [
       target.fromPoint,
