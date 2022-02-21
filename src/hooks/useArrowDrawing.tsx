@@ -1,4 +1,4 @@
-import React, { MouseEvent, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
 import { distanceBetweenPoints, pointOnPolylineNearPoint } from '../geometry'
 import { addArrow } from '../reducer'
@@ -10,25 +10,9 @@ import { useSettings } from './useSettings'
 
 // TYPES
 
-export type EventHandlers = {
-  svgMouseEvents: SvgMouseEventHandlers
-  markerMouseEvents: MarkerMouseEventHandlers
-  arrowMouseEvents: ArrowMouseEventHandlers
-}
-
-type SvgMouseEventHandlers = {
-  onMouseMove: (event: MouseEvent) => void
-  onMouseUp: (event: MouseEvent) => void
-}
-
-type MarkerMouseEventHandlers = {
-  onMouseDown: (event: MouseEvent, marker: Marker) => void
-  onMouseMove: (event: MouseEvent, marker: Marker) => void
-  onMouseUp: (event: MouseEvent, marker: Marker) => void
-}
-
-type ArrowMouseEventHandlers = {
-  onMouseDown: (event: MouseEvent, arrow: Arrow) => void
+type EventHandlers = {
+  onClick: (event: React.MouseEvent, target: Marker | Arrow | null) => void
+  onMouseMove: (event: React.MouseEvent, target: Marker | null) => void
 }
 
 // CONTEXTS
@@ -61,100 +45,67 @@ export function ArrowDrawingProvider({
   }, [])
   useKeyboardHandler(escapeKeyHandler)
 
-  const onMouseDown = useCallback(
-    (event: MouseEvent, target: Marker | Arrow) => {
-      event.preventDefault()
-      const currentPoint = eventCoordinates(event)
-      const { fromPoint, fromMarker, dependencies } = dragStartProperties(
-        target,
-        showStraightArrows,
-        currentPoint,
-      )
-      setCurrentArrow({
-        fromPoint,
-        fromMarker,
-        midPoints: [],
-        toPoint: currentPoint,
-        toMarker: null,
-        dependencies,
-      })
-    },
-    [eventCoordinates, showStraightArrows],
-  )
-
-  const onMouseMove = useCallback(
-    (event: MouseEvent, marker: Marker | null = null) => {
-      if (!currentArrow) {
+  const onClick = useCallback(
+    (event: React.MouseEvent, target: Marker | Arrow | null) => {
+      if (event.button === 2) {
         return
       }
-
-      if (marker) {
-        event.stopPropagation()
-      }
-
-      const markerIsOriginMarker = marker?.id === currentArrow.fromMarker
-
+      event.stopPropagation()
       const currentPoint = eventCoordinates(event)
-      const lastPoint =
-        currentArrow.midPoints[currentArrow.midPoints.length - 1] ??
-        currentArrow.fromPoint
-
-      const newMidPoints =
-        !showStraightArrows &&
-        distanceBetweenPoints(currentPoint, lastPoint) > 10
-          ? [...currentArrow.midPoints, currentPoint]
-          : currentArrow.midPoints
-
-      setCurrentArrow({
-        ...currentArrow,
-        midPoints: newMidPoints,
-        toPoint: currentPoint,
-        toMarker: markerIsOriginMarker ? null : marker?.id ?? null,
-      })
+      if (!currentArrow) {
+        if (target) {
+          setCurrentArrow(newArrow(target, showStraightArrows, currentPoint))
+        }
+      } else if (targetIsOrigin(target, currentArrow)) {
+        setCurrentArrow(null)
+      } else if (isMarker(target)) {
+        dispatch(addArrow(finishedArrow(currentPoint, target, currentArrow)))
+        setCurrentArrow(null)
+      } else {
+        setCurrentArrow({
+          ...currentArrow,
+          midPoints: [...currentArrow.midPoints, currentPoint],
+        })
+      }
     },
     [eventCoordinates, currentArrow, showStraightArrows],
   )
 
-  const onMouseUp = useCallback(
-    (event: MouseEvent, marker: Marker | null = null) => {
+  const onMouseMove = useCallback(
+    (event: React.MouseEvent, target: Marker | null) => {
       if (!currentArrow) {
         return
       }
+      event.stopPropagation()
+      const currentPoint = eventCoordinates(event)
 
-      if (!marker || marker.id === currentArrow.fromMarker) {
-        setCurrentArrow(null)
-        return
-      }
+      const addCurrentPointAsMidPoint =
+        currentArrow.drawingMode === 'freehand' &&
+        shouldAddCurrentPointToFreehandArrow(currentPoint, currentArrow)
+      const midPoints = addCurrentPointAsMidPoint
+        ? [...currentArrow.midPoints, currentPoint]
+        : currentArrow.midPoints
+      const toMarker = targetIsOrigin(target, currentArrow)
+        ? null
+        : target?.id ?? null
 
-      const arrow = {
-        fromMarker: currentArrow.fromMarker,
-        fromPoint: currentArrow.fromPoint,
-        midPoints: currentArrow.midPoints,
-        toMarker: marker.id,
-        toPoint: eventCoordinates(event),
-        id: uuid(),
-        dependencies: { ...currentArrow.dependencies, [marker.id]: true },
-      }
-      dispatch(addArrow(arrow))
-      setCurrentArrow(null)
+      setCurrentArrow({
+        ...currentArrow,
+        midPoints,
+        toPoint: currentPoint,
+        toMarker,
+      })
     },
-    [eventCoordinates, currentArrow],
+    [currentArrow, eventCoordinates],
   )
 
-  const handlers: EventHandlers = {
-    svgMouseEvents: {
-      onMouseMove: (event) => onMouseMove(event),
-      onMouseUp: (event) => onMouseUp(event),
-    },
-    markerMouseEvents: {
-      onMouseDown: (event, marker) => onMouseDown(event, marker),
-      onMouseMove: (event, marker) => onMouseMove(event, marker),
-      onMouseUp: (event, marker) => onMouseUp(event, marker),
-    },
-    arrowMouseEvents: {
-      onMouseDown: (event, arrow: Arrow) => onMouseDown(event, arrow),
-    },
-  }
+  const handlers: EventHandlers = React.useMemo(
+    () => ({
+      onClick,
+      onMouseMove,
+    }),
+    [onClick, onMouseMove],
+  )
 
   return (
     <CurrentArrowContext.Provider value={currentArrow}>
@@ -167,11 +118,11 @@ export function ArrowDrawingProvider({
 
 // HOOKS
 
-export function useArrowDrawingEventHandlers(): EventHandlers {
+export function useDrawingEventHandlers(): EventHandlers {
   const handlers = React.useContext(EventHandlersContext)
   if (!handlers) {
     throw new Error(
-      `Tried to call useArrowDrawingEventHandlers outside of an <ArrowDrawingProvider>`,
+      `Tried to call useDrawingEventHandlers outside of an <ArrowDrawingProvider>`,
     )
   }
 
@@ -191,30 +142,90 @@ export function useCurrentArrowDrawing(): UnfinishedArrow | null {
 
 // UTILITIES
 
-function dragStartProperties(
+function newArrow(
   target: Arrow | Marker,
   showStraightArrows: boolean,
   currentPoint: Point,
-): Pick<UnfinishedArrow, 'fromPoint' | 'fromMarker' | 'dependencies'> {
-  if ('fromMarker' in target) {
+): UnfinishedArrow {
+  const drawingMode = showStraightArrows ? 'jointed' : 'freehand'
+  if (isArrow(target)) {
+    const fromPoint = pointOnPolylineNearPoint(currentPoint, [
+      target.fromPoint,
+      ...target.midPoints,
+      target.toPoint,
+    ])
+    const dependencies = {
+      ...target.dependencies,
+      [target.id]: true,
+      [target.fromMarker]: true,
+    }
     return {
-      fromPoint: pointOnPolylineNearPoint(currentPoint, [
-        target.fromPoint,
-        ...target.midPoints,
-        target.toPoint,
-      ]),
+      drawingMode,
+      fromPoint,
       fromMarker: target.fromMarker,
-      dependencies: {
-        ...target.dependencies,
-        [target.id]: true,
-        [target.fromMarker]: true,
-      },
+      fromArrow: target.id,
+      midPoints: [],
+      toPoint: currentPoint,
+      toMarker: null,
+      dependencies,
     }
   } else {
     return {
+      drawingMode,
       fromPoint: currentPoint,
       fromMarker: target.id,
+      fromArrow: null,
+      midPoints: [],
+      toPoint: currentPoint,
+      toMarker: null,
       dependencies: { [target.id]: true },
     }
   }
+}
+
+function finishedArrow(
+  currentPoint: Point,
+  target: Marker,
+  currentArrow: UnfinishedArrow,
+): Arrow {
+  return {
+    fromMarker: currentArrow.fromMarker,
+    fromPoint: currentArrow.fromPoint,
+    midPoints: currentArrow.midPoints,
+    toMarker: target.id,
+    toPoint: currentPoint,
+    id: uuid(),
+    dependencies: { ...currentArrow.dependencies, [target.id]: true },
+  }
+}
+
+function shouldAddCurrentPointToFreehandArrow(
+  currentPoint: Point,
+  currentArrow: UnfinishedArrow,
+) {
+  const lastPoint =
+    currentArrow.midPoints[currentArrow.midPoints.length - 1] ??
+    currentArrow.fromPoint
+  return distanceBetweenPoints(currentPoint, lastPoint) > 10
+}
+
+function isArrow(target: Arrow | Marker | null): target is Arrow {
+  return target !== null && 'fromMarker' in target
+}
+
+function isMarker(target: Arrow | Marker | null): target is Marker {
+  return target !== null && !('fromMarker' in target)
+}
+
+function targetIsOrigin(
+  target: Marker | Arrow | null,
+  currentArrow: UnfinishedArrow,
+): boolean {
+  if (!target) {
+    return false
+  }
+  return (
+    target.id === currentArrow.fromArrow ||
+    target.id === currentArrow.fromMarker
+  )
 }

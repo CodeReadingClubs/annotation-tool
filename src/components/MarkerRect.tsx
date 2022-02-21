@@ -1,5 +1,5 @@
 import React from 'react'
-import { useArrowDrawingEventHandlers } from '../hooks/useArrowDrawing'
+import { useDrawingEventHandlers } from '../hooks/useArrowDrawing'
 import useCssColor from '../hooks/useCssColor'
 import { selectMarker } from '../reducer'
 import { useDispatch } from '../store'
@@ -13,7 +13,11 @@ type Props = {
 export default function MarkerRect({ marker, selectable }: Props) {
   const color = useCssColor(marker.color)
   const dispatch = useDispatch()
-  const { markerMouseEvents } = useArrowDrawingEventHandlers()
+  const { onClick, onMouseMove } = useDrawingEventHandlers()
+  const onContextMenu = (event: React.MouseEvent) => {
+    event.preventDefault()
+    dispatch(selectMarker(marker))
+  }
 
   return (
     <rect
@@ -23,10 +27,9 @@ export default function MarkerRect({ marker, selectable }: Props) {
       height={marker.height}
       fill={color}
       style={{ pointerEvents: selectable ? 'auto' : 'none' }}
-      onClick={() => dispatch(selectMarker(marker))}
-      onMouseDown={(event) => markerMouseEvents.onMouseDown(event, marker)}
-      onMouseMove={(event) => markerMouseEvents.onMouseMove(event, marker)}
-      onMouseUp={(event) => markerMouseEvents.onMouseUp(event, marker)}
+      onContextMenu={onContextMenu}
+      onClick={(event) => onClick(event, marker)}
+      onMouseMove={(event) => onMouseMove(event, marker)}
     ></rect>
   )
 }

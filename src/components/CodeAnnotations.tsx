@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import {
   ArrowDrawingProvider,
-  useArrowDrawingEventHandlers,
   useCurrentArrowDrawing,
+  useDrawingEventHandlers,
 } from '../hooks/useArrowDrawing'
 import { ContainerDiv } from '../hooks/useContainer'
 import useTextSelectionHandler from '../hooks/useTextSelectionHandler'
@@ -33,7 +33,7 @@ export default function CodeAnnotations({
 
 function Svg() {
   const currentArrow = useCurrentArrowDrawing()
-  const { svgMouseEvents } = useArrowDrawingEventHandlers()
+  const drawing = useDrawingEventHandlers()
 
   const selectionChangeHandler = useTextSelectionHandler()
   useEffect(() => {
@@ -45,8 +45,8 @@ function Svg() {
       style={{
         pointerEvents: currentArrow ? 'auto' : 'none',
       }}
-      onMouseMove={(e) => svgMouseEvents.onMouseMove(e)}
-      onMouseUp={(e) => svgMouseEvents.onMouseUp(e)}
+      onMouseMove={(event) => drawing.onMouseMove(event, null)}
+      onClick={(event) => drawing.onClick(event, null)}
     >
       <UnfinishedArrowLine />
       <Arrows />

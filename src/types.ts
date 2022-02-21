@@ -26,8 +26,10 @@ export type Marker = TextSelection & {
 }
 
 export type UnfinishedArrow = {
+  drawingMode: 'jointed' | 'freehand'
   fromPoint: Point
   fromMarker: string
+  fromArrow: string | null
   midPoints: Point[]
   toPoint: Point
   toMarker: string | null

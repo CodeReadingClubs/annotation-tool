@@ -1,8 +1,8 @@
 import React, { MouseEvent } from 'react'
 import { arrowAngleForPoints, pointArrayForArrow } from '../geometry'
 import {
-  useArrowDrawingEventHandlers,
   useCurrentArrowDrawing,
+  useDrawingEventHandlers,
 } from '../hooks/useArrowDrawing'
 import { useContainer } from '../hooks/useContainer'
 import useCssColor from '../hooks/useCssColor'
@@ -14,16 +14,16 @@ type Props = {
   arrow: Arrow | UnfinishedArrow
   highlighted: boolean
   selectable: boolean
+  onContextMenu?: (event: MouseEvent) => void
   onClick?: (event: MouseEvent) => void
-  onMouseDown?: (event: MouseEvent) => void
 }
 
 function ArrowLine({
   arrow,
   highlighted,
   selectable,
+  onContextMenu,
   onClick,
-  onMouseDown,
 }: Props) {
   const toMarker = useSelector((state) =>
     arrow.toMarker ? state.markers[arrow.toMarker] : null,
@@ -37,12 +37,12 @@ function ArrowLine({
   )
   const cssColor = useCssColor(color)
 
-  const hasMouseEvents = onClick !== undefined || onMouseDown !== undefined
+  const hasMouseEvents = onContextMenu !== undefined || onClick !== undefined
   const strokeWidth = highlighted ? 5 : 3
   return (
     <g
+      onContextMenu={onContextMenu}
       onClick={onClick}
-      onMouseDown={onMouseDown}
       style={{
         pointerEvents: selectable ? 'auto' : 'none',
         cursor: hasMouseEvents ? 'crosshair' : 'auto',
@@ -100,23 +100,23 @@ export function FinishedArrowLine({
   selectable,
 }: FinishedArrowLineProps) {
   const dispatch = useDispatch()
-  const { arrowMouseEvents } = useArrowDrawingEventHandlers()
+  const drawing = useDrawingEventHandlers()
   const { eventCoordinates } = useContainer()
+  const onContextMenu = React.useCallback(
+    (event: MouseEvent) => {
+      event.preventDefault()
+      dispatch(selectArrow({ arrow, point: eventCoordinates(event) }))
+    },
+    [eventCoordinates],
+  )
 
   return (
     <ArrowLine
       arrow={arrow}
       selectable={selectable}
       highlighted={highlighted}
-      onClick={(event) =>
-        dispatch(
-          selectArrow({
-            arrow,
-            point: eventCoordinates(event),
-          }),
-        )
-      }
-      onMouseDown={(event) => arrowMouseEvents.onMouseDown(event, arrow)}
+      onContextMenu={onContextMenu}
+      onClick={(event) => drawing.onClick(event, arrow)}
     />
   )
 }
