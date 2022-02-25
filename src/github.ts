@@ -5,23 +5,43 @@ export type File = {
   path: string
 }
 
-// captures a github url (or just the path) of a permalink file on github:
-// <optional github.com stuff>/<author>/<repo>/blob/<a commit sha>/<file path>
-// the author, repo, sha, and file path are captured
-const pathRegex =
-  /^(?:(?:https?:\/\/)(?:www\.)?github\.com)?\/?([^\/]+)\/([^\/]+)\/blob\/([a-fA-F0-9]{5,40})\/(.*)\/?$/
+export type ParseError =
+  | { type: 'notGithubUrl'; hostname: string }
+  | { type: 'notGithubPermalink'; pathname: string }
 
-// extracts info from a GitHub file permalink using pathRegex (defined above).
-// Returns null if the path doesn't match the expected pattern
-export function parsePath(path: string): File | null {
-  const match = path.match(pathRegex)
+type ParseResult =
+  | { type: 'success'; file: File }
+  | { type: 'failure'; error: ParseError }
 
-  if (!match) {
-    return null
+// extracts info from a GitHub url:
+// https://github.com/<owner>/<repo>/blob/<a commit sha>/<file path>
+// Throws a ParseError if the url doesn't match the expected pattern
+export function parsePath(path: string): ParseResult {
+  const url = new URL(path, 'https://github.com')
+  if (url.hostname !== 'github.com') {
+    return {
+      type: 'failure',
+      error: { type: 'notGithubUrl', hostname: url.hostname },
+    }
+  }
+  const [, owner, repo, theWordBlob, commitSha, ...filePathComponents] =
+    url.pathname.split('/')
+
+  if (
+    theWordBlob !== 'blob' ||
+    filePathComponents.length === 0 ||
+    !/^[a-fA-F0-9]{5,40}$/.test(commitSha)
+  ) {
+    return {
+      type: 'failure',
+      error: { type: 'notGithubPermalink', pathname: url.pathname },
+    }
   }
 
-  const [_, owner, repo, commitSha, codePath] = match
-  return { owner, repo, commitSha, path: codePath }
+  return {
+    type: 'success',
+    file: { owner, repo, commitSha, path: filePathComponents.join('/') },
+  }
 }
 
 // fetches the raw (text) contents of a file on GitHub
