@@ -12,12 +12,12 @@ export function parseHash(hash: string): Source | null {
     return null
   }
 
-  const file = parsePath(githubPath)
-  if (!file) {
+  const parseResult = parsePath(githubPath)
+  if (parseResult.type !== 'success') {
     return null
   }
 
-  return { type: 'githubPermalink', file }
+  return { type: 'githubPermalink', file: parseResult.file }
 }
 
 export function sourceHash(source: Source): string {

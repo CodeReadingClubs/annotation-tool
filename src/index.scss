@@ -165,10 +165,44 @@ body {
   grid-template-rows: repeat(4, auto);
 }
 
-.file-form {
-  input {
-    width: 40rem;
+.home-page {
+  main {
+    width: 50rem;
     max-width: 95%;
+    margin: 0 auto;
+
+    .file-form {
+      &__input-row {
+        display: flex;
+        flex-direction: row;
+
+        input {
+          flex-grow: 1;
+          flex-shrink: 1;
+        }
+      }
+
+      [role='alert'] {
+        border: 0.125rem solid red;
+        background: rgb(255, 245, 245);
+        padding: 1rem;
+        margin-top: 2rem;
+
+        .permalink-diagram {
+          margin-top: 3rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+      }
+    }
+
+    .trimmable-url {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      overflow: hidden;
+    }
   }
 }
 
