@@ -1,29 +1,34 @@
 import React, { MouseEvent } from 'react'
 import { arrowAngleForPoints, pointArrayForArrow } from '../geometry'
+import {
+  useCurrentArrowDrawing,
+  useDrawingEventHandlers,
+} from '../hooks/useArrowDrawing'
+import { useContainer } from '../hooks/useContainer'
 import useCssColor from '../hooks/useCssColor'
-import { useSelector } from '../store'
+import { selectArrow } from '../reducer'
+import { useDispatch, useSelector } from '../store'
 import { Arrow, UnfinishedArrow } from '../types'
 
 type Props = {
   arrow: Arrow | UnfinishedArrow
-  highlighted?: boolean
+  highlighted: boolean
   selectable: boolean
+  onContextMenu?: (event: MouseEvent) => void
   onClick?: (event: MouseEvent) => void
-  onMouseDown?: (event: MouseEvent) => void
 }
 
-export default function ArrowLine({
+function ArrowLine({
   arrow,
-  highlighted = false,
+  highlighted,
   selectable,
+  onContextMenu,
   onClick,
-  onMouseDown,
 }: Props) {
   const toMarker = useSelector((state) =>
     arrow.toMarker ? state.markers[arrow.toMarker] : null,
   )
   const points = pointArrayForArrow(arrow, toMarker)
-
   const endPoint = points[points.length - 1]
   const arrowAngle = arrowAngleForPoints(points)
   const pointsString = points.map(({ x, y }) => `${x},${y}`).join(' ')
@@ -32,12 +37,12 @@ export default function ArrowLine({
   )
   const cssColor = useCssColor(color)
 
-  const hasMouseEvents = onClick !== undefined || onMouseDown !== undefined
+  const hasMouseEvents = onContextMenu !== undefined || onClick !== undefined
   const strokeWidth = highlighted ? 5 : 3
   return (
     <g
+      onContextMenu={onContextMenu}
       onClick={onClick}
-      onMouseDown={onMouseDown}
       style={{
         pointerEvents: selectable ? 'auto' : 'none',
         cursor: hasMouseEvents ? 'crosshair' : 'auto',
@@ -81,4 +86,46 @@ export default function ArrowLine({
       )}
     </g>
   )
+}
+
+type FinishedArrowLineProps = {
+  arrow: Arrow
+  highlighted: boolean
+  selectable: boolean
+}
+
+export function FinishedArrowLine({
+  arrow,
+  highlighted,
+  selectable,
+}: FinishedArrowLineProps) {
+  const dispatch = useDispatch()
+  const drawing = useDrawingEventHandlers()
+  const { eventCoordinates } = useContainer()
+  const onContextMenu = React.useCallback(
+    (event: MouseEvent) => {
+      event.preventDefault()
+      drawing.cancelArrow()
+      dispatch(selectArrow({ arrow, point: eventCoordinates(event) }))
+    },
+    [eventCoordinates, drawing.cancelArrow],
+  )
+
+  return (
+    <ArrowLine
+      arrow={arrow}
+      selectable={selectable}
+      highlighted={highlighted}
+      onContextMenu={onContextMenu}
+      onClick={(event) => drawing.onClick(event, arrow)}
+    />
+  )
+}
+
+export function UnfinishedArrowLine() {
+  const arrow = useCurrentArrowDrawing()
+  if (!arrow) {
+    return null
+  }
+  return <ArrowLine arrow={arrow} highlighted={false} selectable={false} />
 }

@@ -7,28 +7,31 @@ import React, {
 } from 'react'
 import { Brightness } from '../colors'
 
+export type ArrowDrawingMode = 'jointed' | 'freehand'
+
 export type Settings = {
-  showStraightArrows: boolean
+  arrowDrawingMode: ArrowDrawingMode
   annotationBrightness: Brightness
-  setShowStraightArrows: (newValue: boolean) => void
+  setArrowDrawingMode: (drawingMode: ArrowDrawingMode) => void
   setAnnotationBrightness: (newValue: Brightness) => void
 }
 
 const SettingsContext = createContext<Settings | null>(null)
 
 export function SettingsProvider({ children }: PropsWithChildren<{}>) {
-  const [showStraightArrows, setShowStraightArrows] = useState(false)
+  const [arrowDrawingMode, setArrowDrawingMode] =
+    useState<ArrowDrawingMode>('freehand')
   const [annotationBrightness, setAnnotationBrightness] =
     useState<Brightness>('medium')
 
   const value = useMemo(
     () => ({
-      showStraightArrows,
+      arrowDrawingMode,
       annotationBrightness,
-      setShowStraightArrows,
+      setArrowDrawingMode,
       setAnnotationBrightness,
     }),
-    [showStraightArrows, annotationBrightness],
+    [arrowDrawingMode, annotationBrightness],
   )
 
   return (

@@ -1,4 +1,5 @@
 import { Color } from './colors'
+import { ArrowDrawingMode } from './hooks/useSettings'
 
 export type Point = { x: number; y: number }
 
@@ -26,8 +27,10 @@ export type Marker = TextSelection & {
 }
 
 export type UnfinishedArrow = {
+  drawingMode: ArrowDrawingMode
   fromPoint: Point
   fromMarker: string
+  fromArrow: string | null
   midPoints: Point[]
   toPoint: Point
   toMarker: string | null

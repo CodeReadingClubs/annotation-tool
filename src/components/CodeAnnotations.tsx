@@ -1,10 +1,13 @@
 import React, { useEffect } from 'react'
-import useArrowDrawing from '../hooks/useArrowDrawing'
-import { ContainerDiv, useContainer } from '../hooks/useContainer'
+import {
+  ArrowDrawingProvider,
+  useCurrentArrowDrawing,
+  useDrawingEventHandlers,
+} from '../hooks/useArrowDrawing'
+import { ContainerDiv } from '../hooks/useContainer'
 import useTextSelectionHandler from '../hooks/useTextSelectionHandler'
-import { selectArrow, selectMarker } from '../reducer'
-import { useDispatch, useSelector } from '../store'
-import ArrowLine from './ArrowLine'
+import { useSelector } from '../store'
+import { FinishedArrowLine, UnfinishedArrowLine } from './ArrowLine'
 import MarkerRect from './MarkerRect'
 import SelectionPopover from './SelectionPopover'
 
@@ -20,14 +23,18 @@ export default function CodeAnnotations({
         gridRow: `1 / span ${numberOfLines}`,
       }}
     >
-      <Svg />
-      <SelectionPopover />
+      <ArrowDrawingProvider>
+        <Svg />
+        <DrawingCancelationButton />
+        <SelectionPopover />
+      </ArrowDrawingProvider>
     </ContainerDiv>
   )
 }
 
 function Svg() {
-  const { currentArrow, mouseEvents } = useArrowDrawing()
+  const currentArrow = useCurrentArrowDrawing()
+  const drawing = useDrawingEventHandlers()
 
   const selectionChangeHandler = useTextSelectionHandler()
   useEffect(() => {
@@ -39,41 +46,26 @@ function Svg() {
       style={{
         pointerEvents: currentArrow ? 'auto' : 'none',
       }}
-      onMouseMove={(e) => mouseEvents.svg.onMouseMove(e)}
-      onMouseUp={(e) => mouseEvents.svg.onMouseUp(e)}
+      onMouseMove={(event) => drawing.onMouseMove(event, null)}
+      onClick={(event) => drawing.onClick(event, null)}
     >
-      {currentArrow && <ArrowLine arrow={currentArrow} selectable={false} />}
-      <Arrows arrowMouseEvents={mouseEvents.arrow} />
-      <Markers markerMouseEvents={mouseEvents.marker} />
+      <UnfinishedArrowLine />
+      <Arrows />
+      <Markers />
     </svg>
   )
 }
 
-type ArrowsProps = {
-  arrowMouseEvents: ReturnType<typeof useArrowDrawing>['mouseEvents']['arrow']
-}
-
-function Arrows({ arrowMouseEvents }: ArrowsProps) {
-  const dispatch = useDispatch()
+function Arrows() {
   const arrows = useSelector((state) => Object.values(state.arrows))
   const currentSelection = useSelector((state) => state.currentSelection)
-  const { eventCoordinates } = useContainer()
 
   return (
     <>
       {arrows.map((arrow) => (
-        <ArrowLine
+        <FinishedArrowLine
           arrow={arrow}
           selectable={currentSelection?.type !== 'text'}
-          onClick={(e) =>
-            dispatch(
-              selectArrow({
-                arrow,
-                point: eventCoordinates(e),
-              }),
-            )
-          }
-          onMouseDown={(e) => arrowMouseEvents.onMouseDown(e, arrow)}
           highlighted={
             currentSelection?.type === 'arrow' &&
             (arrow.id === currentSelection.arrow.id ||
@@ -86,12 +78,7 @@ function Arrows({ arrowMouseEvents }: ArrowsProps) {
   )
 }
 
-type MarkersProps = {
-  markerMouseEvents: ReturnType<typeof useArrowDrawing>['mouseEvents']['marker']
-}
-
-function Markers({ markerMouseEvents }: MarkersProps) {
-  const dispatch = useDispatch()
+function Markers() {
   const markers = useSelector((state) => Object.values(state.markers))
   const currentSelection = useSelector((state) => state.currentSelection)
 
@@ -102,12 +89,24 @@ function Markers({ markerMouseEvents }: MarkersProps) {
           key={marker.id}
           marker={marker}
           selectable={currentSelection?.type !== 'text'}
-          onClick={() => dispatch(selectMarker(marker))}
-          onMouseDown={(e) => markerMouseEvents.onMouseDown(e, marker)}
-          onMouseMove={(e) => markerMouseEvents.onMouseMove(e, marker)}
-          onMouseUp={(e) => markerMouseEvents.onMouseUp(e, marker)}
         />
       ))}
     </>
+  )
+}
+
+function DrawingCancelationButton() {
+  const currentArrow = useCurrentArrowDrawing()
+  const drawing = useDrawingEventHandlers()
+  if (!currentArrow) {
+    return null
+  }
+  return (
+    <button
+      className='drawing-cancelation-button'
+      onClick={() => drawing.cancelArrow()}
+    >
+      To cancel the current arrow, hit <kbd>esc</kbd> or click here
+    </button>
   )
 }

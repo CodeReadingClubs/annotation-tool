@@ -1,25 +1,24 @@
-import React, { MouseEvent } from 'react'
+import React from 'react'
+import { useDrawingEventHandlers } from '../hooks/useArrowDrawing'
 import useCssColor from '../hooks/useCssColor'
+import { selectMarker } from '../reducer'
+import { useDispatch } from '../store'
 import { Marker } from '../types'
 
 type Props = {
   marker: Marker
   selectable: boolean
-  onClick: () => void
-  onMouseDown: (e: MouseEvent) => void
-  onMouseMove: (e: MouseEvent) => void
-  onMouseUp: (e: MouseEvent) => void
 }
 
-export default function MarkerRect({
-  marker,
-  selectable,
-  onClick,
-  onMouseDown,
-  onMouseMove,
-  onMouseUp,
-}: Props) {
+export default function MarkerRect({ marker, selectable }: Props) {
   const color = useCssColor(marker.color)
+  const dispatch = useDispatch()
+  const drawing = useDrawingEventHandlers()
+  const onContextMenu = (event: React.MouseEvent) => {
+    event.preventDefault()
+    drawing.cancelArrow()
+    dispatch(selectMarker(marker))
+  }
 
   return (
     <rect
@@ -29,10 +28,9 @@ export default function MarkerRect({
       height={marker.height}
       fill={color}
       style={{ pointerEvents: selectable ? 'auto' : 'none' }}
-      onClick={onClick}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
+      onContextMenu={onContextMenu}
+      onClick={(event) => drawing.onClick(event, marker)}
+      onMouseMove={(event) => drawing.onMouseMove(event, marker)}
     ></rect>
   )
 }
