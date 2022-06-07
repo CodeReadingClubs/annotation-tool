@@ -25,7 +25,7 @@ export default function CodeAnnotations({
     >
       <ArrowDrawingProvider>
         <Svg />
-        <DrawingCancelationButton />
+        <DrawingCompletion />
         <SelectionPopover />
       </ArrowDrawingProvider>
     </ContainerDiv>
@@ -95,18 +95,21 @@ function Markers() {
   )
 }
 
-function DrawingCancelationButton() {
+function DrawingCompletion() {
   const currentArrow = useCurrentArrowDrawing()
   const drawing = useDrawingEventHandlers()
   if (!currentArrow) {
     return null
   }
   return (
-    <button
-      className='drawing-cancelation-button'
-      onClick={() => drawing.cancelArrow()}
-    >
-      To cancel the current arrow, hit <kbd>esc</kbd> or click here
-    </button>
+    <div className="drawing-completion">
+      Click on a second highlight to complete arrow.
+      {" "}
+      <button
+        onClick={() => drawing.cancelArrow()}
+      >
+        Click here to cancel or hit <kbd>Esc</kbd>
+      </button>
+    </div>
   )
 }
