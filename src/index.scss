@@ -30,7 +30,6 @@ body {
     display: grid;
     grid-template-columns: auto auto 1fr;
     align-items: center;
-    font-family: 'Roboto Mono', monospace;
     row-gap: 0.5rem;
 
     .line-annotations {
@@ -62,6 +61,7 @@ body {
     }
 
     .line-number {
+      font-family: 'Roboto Mono', monospace;
       grid-column: 2;
       color: gray;
       text-align: right;
