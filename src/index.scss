@@ -95,13 +95,17 @@ body {
   }
 }
 
-.drawing-completion {
+.drawing-completion-popover {
   pointer-events: auto;
   position: sticky;
   bottom: 0;
   left: 0;
-  background: #fff;
-  padding: 8px 0;
+  background: #ddf7ff;
+  border: 1px solid #447;
+  padding: 0.5rem 0;
+  max-width: 20rem;
+  border-radius: 0.25rem;
+  text-align: center;
 }
 
 .popover {

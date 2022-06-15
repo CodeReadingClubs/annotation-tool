@@ -25,7 +25,7 @@ export default function CodeAnnotations({
     >
       <ArrowDrawingProvider>
         <Svg />
-        <DrawingCompletion />
+        <DrawingCompletionPopover />
         <SelectionPopover />
       </ArrowDrawingProvider>
     </ContainerDiv>
@@ -95,14 +95,14 @@ function Markers() {
   )
 }
 
-function DrawingCompletion() {
+function DrawingCompletionPopover() {
   const currentArrow = useCurrentArrowDrawing()
   const drawing = useDrawingEventHandlers()
   if (!currentArrow) {
     return null
   }
   return (
-    <div className="drawing-completion">
+    <div className="drawing-completion-popover">
       Click on a second highlight to complete arrow.
       {" "}
       <button
