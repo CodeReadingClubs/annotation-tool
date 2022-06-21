@@ -30,7 +30,6 @@ body {
     display: grid;
     grid-template-columns: auto auto 1fr;
     align-items: center;
-    font-family: 'Roboto Mono', monospace;
     row-gap: 0.5rem;
 
     .line-annotations {
@@ -62,6 +61,7 @@ body {
     }
 
     .line-number {
+      font-family: 'Roboto Mono', monospace;
       grid-column: 2;
       color: gray;
       text-align: right;
@@ -92,27 +92,20 @@ body {
       height: 100%;
       mix-blend-mode: multiply;
     }
-
-    .drawing-cancelation-button {
-      pointer-events: auto;
-      position: sticky;
-      bottom: 1rem;
-      left: 1rem;
-      font-size: 1rem;
-      max-width: 10rem;
-      text-align: left;
-      outline: 0;
-      padding: 0.5rem;
-      margin: 0;
-      border: 1px solid black;
-      border-radius: 0.25rem;
-      background: #fff;
-
-      &:hover {
-        background: #eee;
-      }
-    }
   }
+}
+
+.drawing-completion-popover {
+  pointer-events: auto;
+  position: sticky;
+  bottom: 1rem;
+  left: 1rem;
+  background: #ddf7ff;
+  border: 1px solid #447;
+  padding: 0.5rem 0;
+  max-width: 20rem;
+  border-radius: 0.25rem;
+  text-align: center;
 }
 
 .popover {
